@@ -1,82 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { FadeIn } from "@/components/fade-in";
-
-type WeatherData = {
-  temperature: number;
-  description: string;
-  city: string;
-};
-
-type WeatherResponse = {
-  weather: WeatherData | null;
-  useCurrentLocation: boolean;
-};
-
-function getCurrentPosition(): Promise<GeolocationPosition> {
-  return new Promise((resolve, reject) => {
-    if (!navigator.geolocation) {
-      reject(new Error("Geolocation not supported"));
-      return;
-    }
-    navigator.geolocation.getCurrentPosition(resolve, reject, {
-      enableHighAccuracy: false,
-      timeout: 10_000,
-    });
-  });
-}
+import { useWeather } from "@/lib/queries/weather";
 
 export function WeatherWidget() {
-  const [weather, setWeather] = useState<WeatherData | null>(null);
-  const [status, setStatus] = useState<"loading" | "ready" | "unavailable">("loading");
+  const { data, isPending, isError } = useWeather();
+  const weather = data?.weather ?? null;
 
-  useEffect(() => {
-    let cancelled = false;
-
-    async function loadWeather() {
-      try {
-        const initial = await fetch("/api/weather").then(
-          (res) => res.json() as Promise<WeatherResponse>,
-        );
-
-        if (cancelled) return;
-
-        if (initial.useCurrentLocation) {
-          try {
-            const position = await getCurrentPosition();
-            const { latitude, longitude } = position.coords;
-            const located = await fetch(
-              `/api/weather?lat=${latitude}&lon=${longitude}`,
-            ).then((res) => res.json() as Promise<WeatherResponse>);
-
-            if (cancelled) return;
-            setWeather(located.weather);
-            setStatus(located.weather ? "ready" : "unavailable");
-          } catch {
-            if (cancelled) return;
-            setWeather(null);
-            setStatus("unavailable");
-          }
-          return;
-        }
-
-        setWeather(initial.weather);
-        setStatus(initial.weather ? "ready" : "unavailable");
-      } catch {
-        if (cancelled) return;
-        setWeather(null);
-        setStatus("unavailable");
-      }
-    }
-
-    loadWeather();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  if (status === "loading") {
+  if (isPending && !weather) {
     return (
       <div className="mt-4 inline-block rounded-lg border border-border px-4 py-2 font-console text-xs text-muted">
         Weather info
@@ -84,10 +15,10 @@ export function WeatherWidget() {
     );
   }
 
-  if (!weather) {
+  if (!weather || isError) {
     return (
       <div className="mt-4 inline-block rounded-lg border border-border px-4 py-2 font-console text-xs text-muted">
-        {status === "unavailable" ? "Location unavailable" : "Weather info"}
+        {isError || data?.useCurrentLocation ? "Location unavailable" : "Weather info"}
       </div>
     );
   }

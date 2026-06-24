@@ -28,7 +28,6 @@ function buildResults(
   containers: ContainerItem[],
   query: string,
   showDocker: boolean,
-  isAdmin: boolean,
 ): SearchResult[] {
   const q = query.trim();
   const results: SearchResult[] = [];
@@ -48,11 +47,10 @@ function buildResults(
   }
 
   if (
-    isAdmin &&
-    (!q ||
-      matchesQuery("admin", q) ||
-      matchesQuery("settings", q) ||
-      matchesQuery("admin settings", q))
+    !q ||
+    matchesQuery("settings", q) ||
+    matchesQuery("admin", q) ||
+    matchesQuery("admin settings", q)
   ) {
     results.push({ type: "admin" });
   }
@@ -75,10 +73,8 @@ function groupResults(results: SearchResult[]) {
 
 export function DashboardSearch({
   showDocker,
-  isAdmin,
 }: {
   showDocker: boolean;
-  isAdmin: boolean;
 }) {
   const router = useRouter();
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -105,8 +101,8 @@ export function DashboardSearch({
   }, []);
 
   const results = useMemo(
-    () => buildResults(apps, containers, query, showDocker, isAdmin),
-    [apps, containers, query, showDocker, isAdmin],
+    () => buildResults(apps, containers, query, showDocker),
+    [apps, containers, query, showDocker],
   );
 
   const groups = useMemo(() => groupResults(results), [results]);
@@ -127,7 +123,7 @@ export function DashboardSearch({
           .getElementById(`docker-${result.container.id}`)
           ?.scrollIntoView({ block: "nearest" });
       } else if (result.type === "admin") {
-        router.push("/admin");
+        router.push("/settings");
       }
       close();
     },
@@ -305,10 +301,10 @@ export function DashboardSearch({
                                   </div>
                                   <div className="min-w-0 flex-1">
                                     <p className="truncate text-sm">
-                                      Admin / Settings
+                                      Settings
                                     </p>
                                     <p className="font-console text-xs text-muted">
-                                      /admin
+                                      /settings
                                     </p>
                                   </div>
                                 </>

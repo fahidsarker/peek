@@ -46,7 +46,7 @@ export async function createApp(formData: FormData) {
   });
 
   revalidatePath("/");
-  revalidatePath("/admin");
+  revalidatePath("/settings");
   return { ok: true };
 }
 
@@ -76,7 +76,7 @@ export async function updateApp(id: string, formData: FormData) {
     .where(eq(apps.id, id));
 
   revalidatePath("/");
-  revalidatePath("/admin");
+  revalidatePath("/settings");
   return { ok: true };
 }
 
@@ -84,7 +84,7 @@ export async function deleteApp(id: string) {
   await requireAdmin();
   await db.delete(apps).where(eq(apps.id, id));
   revalidatePath("/");
-  revalidatePath("/admin");
+  revalidatePath("/settings");
   return { ok: true };
 }
 
@@ -111,7 +111,7 @@ export async function reorderApps(orderedIds: string[]) {
   );
 
   revalidatePath("/");
-  revalidatePath("/admin");
+  revalidatePath("/settings");
   return { ok: true };
 }
 
@@ -122,14 +122,14 @@ export async function toggleUserAdmin(userId: string, isAdmin: boolean) {
   }
 
   await db.update(user).set({ isAdmin }).where(eq(user.id, userId));
-  revalidatePath("/admin");
+  revalidatePath("/settings");
   return { ok: true };
 }
 
 export async function toggleUserDocker(userId: string, showDocker: boolean) {
   await requireAdmin();
   await db.update(user).set({ showDocker }).where(eq(user.id, userId));
-  revalidatePath("/admin");
+  revalidatePath("/settings");
   revalidatePath("/");
   return { ok: true };
 }
@@ -154,7 +154,7 @@ export async function deleteUser(userId: string) {
   }
 
   await db.delete(user).where(eq(user.id, userId));
-  revalidatePath("/admin");
+  revalidatePath("/settings");
   return { ok: true };
 }
 
@@ -210,7 +210,7 @@ export async function updateSettings(formData: FormData) {
 
   clearWeatherCache();
   revalidatePath("/");
-  revalidatePath("/admin");
+  revalidatePath("/settings");
   return { ok: true };
 }
 

@@ -79,6 +79,22 @@ function cacheKey(lat: number, lon: number, provider: string): string {
   return `${provider}:${lat}:${lon}`;
 }
 
+async function reverseGeocode(lat: number, lon: number): Promise<string> {
+  const url = new URL("https://geocoding-api.open-meteo.com/v1/reverse");
+  url.searchParams.set("latitude", String(lat));
+  url.searchParams.set("longitude", String(lon));
+  url.searchParams.set("language", "en");
+
+  const response = await fetch(url.toString());
+  if (!response.ok) {
+    return "Unknown location";
+  }
+
+  const data = await response.json();
+  const result = data.results?.[0];
+  return result?.name ?? result?.admin1 ?? "Unknown location";
+}
+
 export async function getWeatherConfig() {
   const settings = await getSettings();
   return {
@@ -99,7 +115,7 @@ export async function getWeather(options: WeatherOptions = {}): Promise<WeatherD
     }
     lat = options.lat;
     lon = options.lon;
-    city = "Current location";
+    city = "";
   } else {
     if (settings.weatherLat == null || settings.weatherLon == null) {
       return null;
@@ -114,6 +130,18 @@ export async function getWeather(options: WeatherOptions = {}): Promise<WeatherD
     return weatherCache.data;
   }
 
+  let resolvedCity = city;
+  if (settings.weatherUseCurrentLocation && !resolvedCity) {
+    if (
+      settings.weatherProvider === "openweather" &&
+      settings.openWeatherApiKey
+    ) {
+      resolvedCity = "";
+    } else {
+      resolvedCity = await reverseGeocode(lat, lon);
+    }
+  }
+
   let data: WeatherData;
 
   if (
@@ -124,10 +152,10 @@ export async function getWeather(options: WeatherOptions = {}): Promise<WeatherD
       lat,
       lon,
       settings.openWeatherApiKey,
-      city,
+      resolvedCity,
     );
   } else {
-    data = await fetchOpenMeteo(lat, lon, city);
+    data = await fetchOpenMeteo(lat, lon, resolvedCity);
   }
 
   weatherCache = {

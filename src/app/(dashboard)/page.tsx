@@ -28,19 +28,14 @@ export default async function DashboardPage() {
         </FadeIn>
 
         <div className="flex items-center gap-2">
-          <DashboardSearch
-            showDocker={!!showDocker}
-            isAdmin={!!user.isAdmin}
-          />
-          {user.isAdmin && (
-            <Link
-              href="/admin"
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-border font-console text-sm text-muted transition-opacity hover:opacity-80"
-              title="Settings / Admin"
-            >
-              ⚙
-            </Link>
-          )}
+          <DashboardSearch showDocker={!!showDocker} />
+          <Link
+            href="/settings"
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-border font-console text-sm text-muted transition-opacity hover:opacity-80"
+            title="Settings"
+          >
+            ⚙
+          </Link>
         </div>
       </div>
 

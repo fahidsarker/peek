@@ -1,15 +1,15 @@
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/session";
 
-export default async function AdminLayout({
+export default async function SettingsLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   const session = await getSession();
 
-  if (!session?.user.isAdmin) {
-    redirect("/");
+  if (!session) {
+    redirect("/login");
   }
 
   return children;

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Inconsolata, Inter, Poppins } from "next/font/google";
-import { QueryProvider } from "@/components/query-provider";
+import { SessionQueryProvider } from "@/components/session-query-provider";
 import "./globals.css";
 
 const inter = Inter({
@@ -35,7 +35,7 @@ export default function RootLayout({
       className={`${inter.variable} ${inconsolata.variable} ${poppins.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
-        <QueryProvider>{children}</QueryProvider>
+        <SessionQueryProvider>{children}</SessionQueryProvider>
       </body>
     </html>
   );
