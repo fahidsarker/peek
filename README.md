@@ -1,6 +1,13 @@
-# peek
+<p align="center">
+  <img src="https://github.com/fahidsarker/peek/blob/main/assets/banner.png" alt="peek — ultra-minimal NAS dashboard" width="100%" />
+</p>
 
-Ultra-minimal dashboard for NAS or self-hosted servers. Welcome header with date, time, and weather; user-managed app shortcuts with health pings; Docker container list with restart and pause/start controls.
+<p align="center">
+  Ultra-minimal dashboard for NAS or self-hosted servers.<br />
+  Welcome header with date, time, and weather; user-managed app shortcuts with health pings; Docker container list with restart and pause/start controls.
+</p>
+
+---
 
 ## Stack
 
