@@ -50,23 +50,25 @@ export function AppList() {
           href={app.publicUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-4 py-4 transition-opacity hover:opacity-80"
+          className="flex items-center gap-4 py-2 transition-opacity hover:opacity-80"
         >
-          <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full border border-border bg-surface">
-            <Image
-              src={app.iconUrl}
-              alt=""
-              fill
-              className="object-cover"
-              unoptimized
-            />
-          </div>
-          <div className="min-w-0 flex-1">
+          <div className="flex gap-2 items-center min-w-0 flex-1">
+            <div className="relative size-4 shrink-0 overflow-hidden rounded-full border border-border bg-surface">
+              <Image
+                src={app.iconUrl}
+                alt=""
+                fill
+                className="object-cover"
+                unoptimized
+              />
+            </div>
+
             <p className="truncate text-sm">{app.title}</p>
-            <p className="truncate font-console text-xs text-muted">
-              {app.publicUrl}
-            </p>
           </div>
+          <p className="truncate font-console text-xs text-muted">
+            {app.publicUrl}
+          </p>
+
           <span
             className={`h-2.5 w-2.5 shrink-0 rounded-full ${statusColor(app.lastPingStatus)}`}
             title={app.lastPingStatus}

@@ -14,8 +14,8 @@ export default async function DashboardPage() {
   const showDocker = user.showDocker;
 
   return (
-    <main className="mx-auto flex min-h-full w-full max-w-6xl flex-1 flex-col p-6 md:p-10">
-      <div className="mb-10 flex items-start justify-between">
+    <main className="mx-auto flex h-dvh max-h-dvh w-full max-w-6xl flex-col overflow-hidden p-6 md:p-10">
+      <div className="mb-4 flex shrink-0 items-start justify-between">
         <FadeIn>
           <p className="font-greeting text-3xl">Hello {user.name.split(" ")[0]}</p>
           <Clock />
@@ -34,19 +34,22 @@ export default async function DashboardPage() {
       </div>
 
       <div
-        className={`grid flex-1 gap-0 rounded-2xl border border-border ${
-          showDocker ? "md:grid-cols-2" : "md:grid-cols-1"
-        }`}
+        className={`grid min-h-0 flex-1 gap-0 rounded-2xl border-border ${showDocker ? "md:grid-cols-2" : "md:grid-cols-1"
+          }`}
       >
-        <section className="p-6 md:p-8">
-          <h2 className="mb-6 font-console text-sm text-muted">Apps</h2>
-          <AppList />
+        <section className="flex min-h-0 flex-col p-6 md:p-8">
+          <h2 className="mb-6 shrink-0 font-console text-sm text-muted">Apps</h2>
+          <div className="scrollbar-hidden min-h-0 flex-1 overflow-y-auto">
+            <AppList />
+          </div>
         </section>
 
         {showDocker && (
-          <section className="border-t border-border p-6 md:border-t-0 md:border-l md:p-8">
-            <h2 className="mb-6 font-console text-sm text-muted">Docker</h2>
-            <DockerList />
+          <section className="flex min-h-0 flex-col border-t border-border p-6 md:border-t-0 md:border-l md:border-dashed md:p-8">
+            <h2 className="mb-6 shrink-0 font-console text-sm text-muted">Docker</h2>
+            <div className="scrollbar-hidden min-h-0 flex-1 overflow-y-auto">
+              <DockerList />
+            </div>
           </section>
         )}
       </div>

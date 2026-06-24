@@ -53,3 +53,12 @@ body {
 .animate-fade-in {
   animation: fade-in 180ms ease-out forwards;
 }
+
+.scrollbar-hidden {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none;
+}
