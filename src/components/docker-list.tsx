@@ -74,7 +74,11 @@ export function DockerList() {
         const pauseAction = isPaused ? "unpause" : "pause";
 
         return (
-          <div key={container.id} className="flex items-center gap-4 py-4">
+          <div
+            id={`docker-${container.id}`}
+            key={container.id}
+            className="flex items-center gap-4 py-4"
+          >
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border bg-surface font-console text-xs text-muted">
               dc
             </div>

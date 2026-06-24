@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AppList } from "@/components/app-list";
+import { DashboardSearch } from "@/components/dashboard-search";
 import { Clock } from "@/components/clock";
 import { DockerList } from "@/components/docker-list";
 import { FadeIn } from "@/components/fade-in";
@@ -22,15 +23,21 @@ export default async function DashboardPage() {
           <WeatherWidget />
         </FadeIn>
 
-        {user.isAdmin && (
-          <Link
-            href="/admin"
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-border font-console text-sm text-muted transition-opacity hover:opacity-80"
-            title="Settings / Admin"
-          >
-            ⚙
-          </Link>
-        )}
+        <div className="flex items-center gap-2">
+          <DashboardSearch
+            showDocker={!!showDocker}
+            isAdmin={!!user.isAdmin}
+          />
+          {user.isAdmin && (
+            <Link
+              href="/admin"
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-border font-console text-sm text-muted transition-opacity hover:opacity-80"
+              title="Settings / Admin"
+            >
+              ⚙
+            </Link>
+          )}
+        </div>
       </div>
 
       <div
