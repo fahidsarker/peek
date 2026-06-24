@@ -1,15 +1,15 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import {
   createApp,
-  deleteApp,
   deleteUser,
   toggleUserAdmin,
   toggleUserDocker,
   updateSettings,
 } from "@/app/admin/actions";
+import { SortableAppList } from "@/components/admin/sortable-app-list";
 import { FadeIn } from "@/components/fade-in";
 
 type AppRow = {
@@ -32,6 +32,7 @@ type UserRow = {
 type SettingsRow = {
   allowSignups: boolean;
   weatherProvider: string;
+  weatherUseCurrentLocation: boolean;
   weatherCity: string | null;
   weatherLat: number | null;
   weatherLon: number | null;
@@ -52,6 +53,13 @@ export function AdminPanel({
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [message, setMessage] = useState<string | null>(null);
+  const [useCurrentLocation, setUseCurrentLocation] = useState(
+    settings?.weatherUseCurrentLocation ?? false,
+  );
+
+  useEffect(() => {
+    setUseCurrentLocation(settings?.weatherUseCurrentLocation ?? false);
+  }, [settings?.weatherUseCurrentLocation]);
 
   function refresh() {
     startTransition(() => router.refresh());
@@ -96,13 +104,6 @@ export function AdminPanel({
             placeholder="Ping URL (optional)"
             className="rounded border border-border bg-surface px-3 py-2 text-sm"
           />
-          <input
-            name="sortOrder"
-            type="number"
-            placeholder="Sort order"
-            defaultValue={0}
-            className="rounded border border-border bg-surface px-3 py-2 text-sm"
-          />
           <button
             type="submit"
             disabled={pending}
@@ -113,30 +114,10 @@ export function AdminPanel({
         </form>
 
         <div className="divide-y divide-border rounded-lg border border-border">
-          {initialApps.length === 0 ? (
-            <p className="p-4 font-console text-sm text-muted">No apps yet.</p>
-          ) : (
-            initialApps.map((app) => (
-              <div key={app.id} className="flex items-center justify-between gap-4 p-4">
-                <div className="min-w-0">
-                  <p className="truncate text-sm">{app.title}</p>
-                  <p className="truncate font-console text-xs text-muted">
-                    {app.publicUrl}
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={async () => {
-                    await deleteApp(app.id);
-                    refresh();
-                  }}
-                  className="shrink-0 font-console text-xs text-status-down"
-                >
-                  Delete
-                </button>
-              </div>
-            ))
-          )}
+          <SortableAppList
+            apps={initialApps}
+            onMessage={setMessage}
+          />
         </div>
       </section>
 
@@ -223,12 +204,23 @@ export function AdminPanel({
             </select>
           </label>
 
+          <label className="flex items-center gap-2 font-console text-sm">
+            <input
+              type="checkbox"
+              name="weatherUseCurrentLocation"
+              checked={useCurrentLocation}
+              onChange={(e) => setUseCurrentLocation(e.target.checked)}
+            />
+            Use current location
+          </label>
+
           <div className="grid gap-3 md:grid-cols-3">
             <input
               name="weatherCity"
               placeholder="City label"
               defaultValue={settings?.weatherCity ?? ""}
-              className="rounded border border-border bg-surface px-3 py-2 text-sm"
+              disabled={useCurrentLocation}
+              className="rounded border border-border bg-surface px-3 py-2 text-sm disabled:opacity-50"
             />
             <input
               name="weatherLat"
@@ -236,7 +228,8 @@ export function AdminPanel({
               step="any"
               placeholder="Latitude"
               defaultValue={settings?.weatherLat ?? ""}
-              className="rounded border border-border bg-surface px-3 py-2 text-sm"
+              disabled={useCurrentLocation}
+              className="rounded border border-border bg-surface px-3 py-2 text-sm disabled:opacity-50"
             />
             <input
               name="weatherLon"
@@ -244,7 +237,8 @@ export function AdminPanel({
               step="any"
               placeholder="Longitude"
               defaultValue={settings?.weatherLon ?? ""}
-              className="rounded border border-border bg-surface px-3 py-2 text-sm"
+              disabled={useCurrentLocation}
+              className="rounded border border-border bg-surface px-3 py-2 text-sm disabled:opacity-50"
             />
           </div>
 

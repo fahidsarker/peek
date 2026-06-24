@@ -109,6 +109,9 @@ export const settings = pgTable("settings", {
   weatherLon: real("weather_lon"),
   weatherCity: text("weather_city"),
   openWeatherApiKey: text("openweather_api_key"),
+  weatherUseCurrentLocation: boolean("weather_use_current_location")
+    .default(false)
+    .notNull(),
 });
 
 export const userRelations = relations(user, ({ many }) => ({

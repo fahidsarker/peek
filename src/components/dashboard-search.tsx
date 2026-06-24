@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useAppsStatus } from "@/lib/queries/apps";
 import { useDockerContainers } from "@/lib/queries/docker";
+import { dockerAvatarRingClass, getInitials } from "@/lib/initials";
 import type { AppItem, ContainerItem } from "@/types/dashboard";
 
 type SearchResult =
@@ -281,8 +282,10 @@ export function DashboardSearch({
 
                               {result.type === "docker" && (
                                 <>
-                                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border bg-background font-console text-xs text-muted">
-                                    dc
+                                  <div
+                                    className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border bg-background font-console text-xs text-muted ${dockerAvatarRingClass(result.container.state)}`}
+                                  >
+                                    {getInitials(result.container.name)}
                                   </div>
                                   <div className="min-w-0 flex-1">
                                     <p className="truncate text-sm">

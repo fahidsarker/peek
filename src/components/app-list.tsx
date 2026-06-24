@@ -36,7 +36,7 @@ export function AppList() {
           className="flex items-center gap-4 py-2 transition-opacity hover:opacity-80"
         >
           <div className="flex gap-2 items-center min-w-0 flex-1">
-            <div className="relative size-4 shrink-0 overflow-hidden  border border-border ">
+            <div className="relative size-4 shrink-0 overflow-hidden  ">
               <Image
                 src={app.iconUrl}
                 alt=""

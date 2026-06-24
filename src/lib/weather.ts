@@ -6,7 +6,16 @@ export type WeatherData = {
   city: string;
 };
 
-let weatherCache: { data: WeatherData; expiresAt: number } | null = null;
+export type WeatherOptions = {
+  lat?: number;
+  lon?: number;
+};
+
+let weatherCache: {
+  key: string;
+  data: WeatherData;
+  expiresAt: number;
+} | null = null;
 
 async function fetchOpenMeteo(lat: number, lon: number, city: string): Promise<WeatherData> {
   const url = new URL("https://api.open-meteo.com/v1/forecast");
@@ -66,17 +75,45 @@ function weatherCodeToDescription(code: number): string {
   return "Unknown";
 }
 
-export async function getWeather(): Promise<WeatherData | null> {
-  if (weatherCache && weatherCache.expiresAt > Date.now()) {
+function cacheKey(lat: number, lon: number, provider: string): string {
+  return `${provider}:${lat}:${lon}`;
+}
+
+export async function getWeatherConfig() {
+  const settings = await getSettings();
+  return {
+    useCurrentLocation: settings.weatherUseCurrentLocation,
+  };
+}
+
+export async function getWeather(options: WeatherOptions = {}): Promise<WeatherData | null> {
+  const settings = await getSettings();
+
+  let lat: number | null = null;
+  let lon: number | null = null;
+  let city: string;
+
+  if (settings.weatherUseCurrentLocation) {
+    if (options.lat == null || options.lon == null) {
+      return null;
+    }
+    lat = options.lat;
+    lon = options.lon;
+    city = "Current location";
+  } else {
+    if (settings.weatherLat == null || settings.weatherLon == null) {
+      return null;
+    }
+    lat = settings.weatherLat;
+    lon = settings.weatherLon;
+    city = settings.weatherCity ?? "Local";
+  }
+
+  const key = cacheKey(lat, lon, settings.weatherProvider);
+  if (weatherCache && weatherCache.key === key && weatherCache.expiresAt > Date.now()) {
     return weatherCache.data;
   }
 
-  const settings = await getSettings();
-  if (settings.weatherLat == null || settings.weatherLon == null) {
-    return null;
-  }
-
-  const city = settings.weatherCity ?? "Local";
   let data: WeatherData;
 
   if (
@@ -84,16 +121,17 @@ export async function getWeather(): Promise<WeatherData | null> {
     settings.openWeatherApiKey
   ) {
     data = await fetchOpenWeather(
-      settings.weatherLat,
-      settings.weatherLon,
+      lat,
+      lon,
       settings.openWeatherApiKey,
       city,
     );
   } else {
-    data = await fetchOpenMeteo(settings.weatherLat, settings.weatherLon, city);
+    data = await fetchOpenMeteo(lat, lon, city);
   }
 
   weatherCache = {
+    key,
     data,
     expiresAt: Date.now() + 10 * 60 * 1000,
   };

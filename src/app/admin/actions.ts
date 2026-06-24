@@ -1,6 +1,6 @@
 "use server";
 
-import { asc, count, eq } from "drizzle-orm";
+import { asc, count, eq, max } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/db";
@@ -14,7 +14,6 @@ const appSchema = z.object({
   iconUrl: z.string().url(),
   publicUrl: z.string().url(),
   pingUrl: z.string().url().optional().or(z.literal("")),
-  sortOrder: z.coerce.number().int().default(0),
 });
 
 export async function createApp(formData: FormData) {
@@ -25,12 +24,14 @@ export async function createApp(formData: FormData) {
     iconUrl: formData.get("iconUrl"),
     publicUrl: formData.get("publicUrl"),
     pingUrl: formData.get("pingUrl"),
-    sortOrder: formData.get("sortOrder") ?? 0,
   });
 
   if (!parsed.success) {
     return { error: "Invalid app data" };
   }
+
+  const [result] = await db.select({ maxOrder: max(apps.sortOrder) }).from(apps);
+  const sortOrder = (result?.maxOrder ?? -1) + 1;
 
   const id = crypto.randomUUID();
   await db.insert(apps).values({
@@ -39,7 +40,7 @@ export async function createApp(formData: FormData) {
     iconUrl: parsed.data.iconUrl,
     publicUrl: parsed.data.publicUrl,
     pingUrl: parsed.data.pingUrl || null,
-    sortOrder: parsed.data.sortOrder,
+    sortOrder,
   });
 
   revalidatePath("/");
@@ -55,7 +56,6 @@ export async function updateApp(id: string, formData: FormData) {
     iconUrl: formData.get("iconUrl"),
     publicUrl: formData.get("publicUrl"),
     pingUrl: formData.get("pingUrl"),
-    sortOrder: formData.get("sortOrder") ?? 0,
   });
 
   if (!parsed.success) {
@@ -69,7 +69,6 @@ export async function updateApp(id: string, formData: FormData) {
       iconUrl: parsed.data.iconUrl,
       publicUrl: parsed.data.publicUrl,
       pingUrl: parsed.data.pingUrl || null,
-      sortOrder: parsed.data.sortOrder,
     })
     .where(eq(apps.id, id));
 
@@ -81,6 +80,30 @@ export async function updateApp(id: string, formData: FormData) {
 export async function deleteApp(id: string) {
   await requireAdmin();
   await db.delete(apps).where(eq(apps.id, id));
+  revalidatePath("/");
+  revalidatePath("/admin");
+  return { ok: true };
+}
+
+export async function reorderApps(orderedIds: string[]) {
+  await requireAdmin();
+
+  const existing = await db.query.apps.findMany({ columns: { id: true } });
+  const existingIds = new Set(existing.map((a) => a.id));
+
+  if (
+    orderedIds.length !== existing.length ||
+    !orderedIds.every((id) => existingIds.has(id))
+  ) {
+    return { error: "Invalid app order" };
+  }
+
+  await Promise.all(
+    orderedIds.map((id, index) =>
+      db.update(apps).set({ sortOrder: index }).where(eq(apps.id, id)),
+    ),
+  );
+
   revalidatePath("/");
   revalidatePath("/admin");
   return { ok: true };
@@ -132,6 +155,7 @@ export async function deleteUser(userId: string) {
 const settingsSchema = z.object({
   allowSignups: z.coerce.boolean(),
   weatherProvider: z.enum(["open-meteo", "openweather"]),
+  weatherUseCurrentLocation: z.coerce.boolean(),
   weatherCity: z.string().optional(),
   weatherLat: z.coerce.number().optional(),
   weatherLon: z.coerce.number().optional(),
@@ -144,6 +168,7 @@ export async function updateSettings(formData: FormData) {
   const parsed = settingsSchema.safeParse({
     allowSignups: formData.get("allowSignups") === "on",
     weatherProvider: formData.get("weatherProvider"),
+    weatherUseCurrentLocation: formData.get("weatherUseCurrentLocation") === "on",
     weatherCity: formData.get("weatherCity") || undefined,
     weatherLat:
       formData.get("weatherLat") && String(formData.get("weatherLat")).length > 0
@@ -165,6 +190,7 @@ export async function updateSettings(formData: FormData) {
     .set({
       allowSignups: parsed.data.allowSignups,
       weatherProvider: parsed.data.weatherProvider,
+      weatherUseCurrentLocation: parsed.data.weatherUseCurrentLocation,
       weatherCity: parsed.data.weatherCity ?? null,
       weatherLat: parsed.data.weatherLat ?? null,
       weatherLon: parsed.data.weatherLon ?? null,

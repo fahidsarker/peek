@@ -6,12 +6,16 @@ import { DockerList } from "@/components/docker-list";
 import { FadeIn } from "@/components/fade-in";
 import { WeatherWidget } from "@/components/weather-widget";
 import { getSession } from "@/lib/session";
+import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
   const session = await getSession();
-  const user = session!.user;
+  const user = session?.user;
+  if (!user) {
+    redirect("/login");
+  }
   const showDocker = user.showDocker;
 
   return (

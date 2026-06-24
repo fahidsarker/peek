@@ -1,0 +1,1 @@
+ALTER TABLE "settings" ADD COLUMN "weather_use_current_location" boolean DEFAULT false NOT NULL;

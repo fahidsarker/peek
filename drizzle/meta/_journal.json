@@ -8,6 +8,13 @@
       "when": 1782262554426,
       "tag": "0000_wooden_marten_broadcloak",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1782276281098,
+      "tag": "0001_unique_spirit",
+      "breakpoints": true
     }
   ]
 }
