@@ -86,6 +86,7 @@ services:
   peek:
     build: .
     restart: unless-stopped
+    user: "${UID:-1001}:${GID:-1001}"
     ports:
       - "3000:3000"
     environment:
@@ -110,6 +111,8 @@ docker compose up -d --build
 ```
 
 On startup, the `peek` container runs `db:generate` and `db:migrate` before starting the app.
+
+Set `UID` and `GID` in your shell or `.env` if you need the container process to match a host user (defaults to `1001:1001`). The `drizzle` directory is world-writable so migrations can run under any UID.
 
 The `peek` service mounts `/var/run/docker.sock` read-only for container controls. Ensure the container user can access the socket (add to the `docker` group or run with appropriate permissions).
 
