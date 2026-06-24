@@ -13,6 +13,7 @@
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.101.1",
     "better-auth": "^1.6.20",
     "date-fns": "^4.4.0",
     "dockerode": "^5.0.0",

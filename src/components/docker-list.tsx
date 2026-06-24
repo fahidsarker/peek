@@ -1,63 +1,40 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { FadeIn } from "@/components/fade-in";
-
-type ContainerItem = {
-  id: string;
-  name: string;
-  state: string;
-  runningFor: string | null;
-};
+import { useDockerContainers } from "@/lib/queries/docker";
+import { queryKeys } from "@/lib/queries/keys";
 
 export function DockerList() {
-  const [containers, setContainers] = useState<ContainerItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+  const {
+    data: containers = [],
+    isPending,
+    error,
+  } = useDockerContainers({ refetchInterval: 15_000 });
   const [acting, setActing] = useState<string | null>(null);
-
-  const loadContainers = useCallback(() => {
-    fetch("/api/docker/containers")
-      .then(async (res) => {
-        if (!res.ok) {
-          const data = await res.json();
-          throw new Error(data.error ?? "Failed to load containers");
-        }
-        return res.json();
-      })
-      .then((data) => {
-        setContainers(data.containers ?? []);
-        setError(null);
-      })
-      .catch((err: Error) => {
-        setError(err.message);
-        setContainers([]);
-      })
-      .finally(() => setLoading(false));
-  }, []);
-
-  useEffect(() => {
-    loadContainers();
-    const interval = setInterval(loadContainers, 15000);
-    return () => clearInterval(interval);
-  }, [loadContainers]);
 
   async function runAction(id: string, action: string) {
     setActing(`${id}-${action}`);
     try {
       await fetch(`/api/docker/containers/${id}/${action}`, { method: "POST" });
-      loadContainers();
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.dockerContainers,
+      });
     } finally {
       setActing(null);
     }
   }
 
-  if (loading) {
+  if (isPending) {
     return <p className="font-console text-sm text-muted">Loading containers...</p>;
   }
 
   if (error) {
-    return <p className="font-console text-sm text-status-down">{error}</p>;
+    return (
+      <p className="font-console text-sm text-status-down">{error.message}</p>
+    );
   }
 
   if (containers.length === 0) {

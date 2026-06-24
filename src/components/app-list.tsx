@@ -1,16 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
 import { FadeIn } from "@/components/fade-in";
-
-type AppItem = {
-  id: string;
-  title: string;
-  iconUrl: string;
-  publicUrl: string;
-  lastPingStatus: string;
-};
+import { useAppsStatus } from "@/lib/queries/apps";
 
 function statusColor(status: string) {
   if (status === "up") return "bg-status-up";
@@ -19,18 +11,9 @@ function statusColor(status: string) {
 }
 
 export function AppList() {
-  const [apps, setApps] = useState<AppItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: apps = [], isPending } = useAppsStatus();
 
-  useEffect(() => {
-    fetch("/api/apps/status?refresh=true")
-      .then((res) => res.json())
-      .then((data) => setApps(data.apps ?? []))
-      .catch(() => setApps([]))
-      .finally(() => setLoading(false));
-  }, []);
-
-  if (loading) {
+  if (isPending) {
     return <p className="font-console text-sm text-muted">Loading apps...</p>;
   }
 
@@ -53,7 +36,7 @@ export function AppList() {
           className="flex items-center gap-4 py-2 transition-opacity hover:opacity-80"
         >
           <div className="flex gap-2 items-center min-w-0 flex-1">
-            <div className="relative size-4 shrink-0 overflow-hidden rounded-full border border-border bg-surface">
+            <div className="relative size-4 shrink-0 overflow-hidden  border border-border ">
               <Image
                 src={app.iconUrl}
                 alt=""

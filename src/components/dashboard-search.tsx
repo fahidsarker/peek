@@ -3,21 +3,9 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-
-type AppItem = {
-  id: string;
-  title: string;
-  iconUrl: string;
-  publicUrl: string;
-  lastPingStatus: string;
-};
-
-type ContainerItem = {
-  id: string;
-  name: string;
-  state: string;
-  runningFor: string | null;
-};
+import { useAppsStatus } from "@/lib/queries/apps";
+import { useDockerContainers } from "@/lib/queries/docker";
+import type { AppItem, ContainerItem } from "@/types/dashboard";
 
 type SearchResult =
   | { type: "app"; app: AppItem }
@@ -98,10 +86,18 @@ export function DashboardSearch({
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [apps, setApps] = useState<AppItem[]>([]);
-  const [containers, setContainers] = useState<ContainerItem[]>([]);
   const [isMac, setIsMac] = useState(false);
+
+  const { data: apps = [], isPending: appsPending } = useAppsStatus({
+    enabled: open,
+  });
+  const { data: containers = [], isPending: containersPending } =
+    useDockerContainers({
+      enabled: open && showDocker,
+    });
+
+  const loading =
+    appsPending || (showDocker && containersPending);
 
   useEffect(() => {
     setIsMac(/Mac|iPhone|iPad/.test(navigator.platform));
@@ -137,40 +133,11 @@ export function DashboardSearch({
     [close, router],
   );
 
-  const loadData = useCallback(async () => {
-    setLoading(true);
-    try {
-      const fetches: Promise<void>[] = [
-        fetch("/api/apps/status?refresh=true")
-          .then((res) => res.json())
-          .then((data) => setApps(data.apps ?? []))
-          .catch(() => setApps([])),
-      ];
-
-      if (showDocker) {
-        fetches.push(
-          fetch("/api/docker/containers")
-            .then(async (res) => {
-              if (!res.ok) return { containers: [] };
-              return res.json();
-            })
-            .then((data) => setContainers(data.containers ?? []))
-            .catch(() => setContainers([])),
-        );
-      }
-
-      await Promise.all(fetches);
-    } finally {
-      setLoading(false);
-    }
-  }, [showDocker]);
-
   useEffect(() => {
     if (open) {
-      loadData();
       requestAnimationFrame(() => inputRef.current?.focus());
     }
-  }, [open, loadData]);
+  }, [open]);
 
   useEffect(() => {
     setSelectedIndex(0);
