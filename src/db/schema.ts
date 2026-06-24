@@ -99,6 +99,12 @@ export const apps = pgTable("apps", {
     .defaultNow()
     .$onUpdate(() => new Date())
     .notNull(),
+  createdBy: text("created_by").references(() => user.id, {
+    onDelete: "set null",
+  }),
+  updatedBy: text("updated_by").references(() => user.id, {
+    onDelete: "set null",
+  }),
 });
 
 export const settings = pgTable("settings", {
@@ -112,11 +118,21 @@ export const settings = pgTable("settings", {
   weatherUseCurrentLocation: boolean("weather_use_current_location")
     .default(false)
     .notNull(),
+  createdBy: text("created_by").references(() => user.id, {
+    onDelete: "set null",
+  }),
+  updatedBy: text("updated_by").references(() => user.id, {
+    onDelete: "set null",
+  }),
 });
 
 export const userRelations = relations(user, ({ many }) => ({
   sessions: many(session),
   accounts: many(account),
+  appsCreated: many(apps, { relationName: "appCreatedBy" }),
+  appsUpdated: many(apps, { relationName: "appUpdatedBy" }),
+  settingsCreated: many(settings, { relationName: "settingsCreatedBy" }),
+  settingsUpdated: many(settings, { relationName: "settingsUpdatedBy" }),
 }));
 
 export const sessionRelations = relations(session, ({ one }) => ({
@@ -130,5 +146,31 @@ export const accountRelations = relations(account, ({ one }) => ({
   user: one(user, {
     fields: [account.userId],
     references: [user.id],
+  }),
+}));
+
+export const appsRelations = relations(apps, ({ one }) => ({
+  createdByUser: one(user, {
+    fields: [apps.createdBy],
+    references: [user.id],
+    relationName: "appCreatedBy",
+  }),
+  updatedByUser: one(user, {
+    fields: [apps.updatedBy],
+    references: [user.id],
+    relationName: "appUpdatedBy",
+  }),
+}));
+
+export const settingsRelations = relations(settings, ({ one }) => ({
+  createdByUser: one(user, {
+    fields: [settings.createdBy],
+    references: [user.id],
+    relationName: "settingsCreatedBy",
+  }),
+  updatedByUser: one(user, {
+    fields: [settings.updatedBy],
+    references: [user.id],
+    relationName: "settingsUpdatedBy",
   }),
 }));

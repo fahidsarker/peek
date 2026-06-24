@@ -17,7 +17,7 @@ const appSchema = z.object({
 });
 
 export async function createApp(formData: FormData) {
-  await requireAdmin();
+  const session = await requireAdmin();
 
   const parsed = appSchema.safeParse({
     title: formData.get("title"),
@@ -41,6 +41,8 @@ export async function createApp(formData: FormData) {
     publicUrl: parsed.data.publicUrl,
     pingUrl: parsed.data.pingUrl || null,
     sortOrder,
+    createdBy: session.user.id,
+    updatedBy: session.user.id,
   });
 
   revalidatePath("/");
@@ -49,7 +51,7 @@ export async function createApp(formData: FormData) {
 }
 
 export async function updateApp(id: string, formData: FormData) {
-  await requireAdmin();
+  const session = await requireAdmin();
 
   const parsed = appSchema.safeParse({
     title: formData.get("title"),
@@ -69,6 +71,7 @@ export async function updateApp(id: string, formData: FormData) {
       iconUrl: parsed.data.iconUrl,
       publicUrl: parsed.data.publicUrl,
       pingUrl: parsed.data.pingUrl || null,
+      updatedBy: session.user.id,
     })
     .where(eq(apps.id, id));
 
@@ -86,7 +89,7 @@ export async function deleteApp(id: string) {
 }
 
 export async function reorderApps(orderedIds: string[]) {
-  await requireAdmin();
+  const session = await requireAdmin();
 
   const existing = await db.query.apps.findMany({ columns: { id: true } });
   const existingIds = new Set(existing.map((a) => a.id));
@@ -100,7 +103,10 @@ export async function reorderApps(orderedIds: string[]) {
 
   await Promise.all(
     orderedIds.map((id, index) =>
-      db.update(apps).set({ sortOrder: index }).where(eq(apps.id, id)),
+      db
+        .update(apps)
+        .set({ sortOrder: index, updatedBy: session.user.id })
+        .where(eq(apps.id, id)),
     ),
   );
 
@@ -163,7 +169,7 @@ const settingsSchema = z.object({
 });
 
 export async function updateSettings(formData: FormData) {
-  await requireAdmin();
+  const session = await requireAdmin();
 
   const parsed = settingsSchema.safeParse({
     allowSignups: formData.get("allowSignups") === "on",
@@ -185,6 +191,8 @@ export async function updateSettings(formData: FormData) {
     return { error: "Invalid settings" };
   }
 
+  const current = await getSettings();
+
   await db
     .update(settings)
     .set({
@@ -195,6 +203,8 @@ export async function updateSettings(formData: FormData) {
       weatherLat: parsed.data.weatherLat ?? null,
       weatherLon: parsed.data.weatherLon ?? null,
       openWeatherApiKey: parsed.data.openWeatherApiKey || null,
+      createdBy: current.createdBy ?? session.user.id,
+      updatedBy: session.user.id,
     })
     .where(eq(settings.id, 1));
 
