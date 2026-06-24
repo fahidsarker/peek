@@ -5,17 +5,13 @@ import { Clock } from "@/components/clock";
 import { DockerList } from "@/components/docker-list";
 import { FadeIn } from "@/components/fade-in";
 import { WeatherWidget } from "@/components/weather-widget";
-import { getSession } from "@/lib/session";
-import { redirect } from "next/navigation";
+import { redirectToLogin } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
-  const session = await getSession();
-  const user = session?.user;
-  if (!user) {
-    redirect("/login");
-  }
+  const session = await redirectToLogin();
+  const user = session.user;
   const showDocker = user.showDocker;
 
   return (

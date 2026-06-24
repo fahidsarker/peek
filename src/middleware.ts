@@ -14,16 +14,11 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const session = hasSession(request);
-
   if (publicPaths.includes(pathname)) {
-    if (session) {
-      return NextResponse.redirect(new URL("/", request.url));
-    }
     return NextResponse.next();
   }
 
-  if (!session) {
+  if (!hasSession(request)) {
     if (pathname.startsWith("/api/")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
