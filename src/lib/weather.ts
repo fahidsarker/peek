@@ -79,20 +79,98 @@ function cacheKey(lat: number, lon: number, provider: string): string {
   return `${provider}:${lat}:${lon}`;
 }
 
-async function reverseGeocode(lat: number, lon: number): Promise<string> {
-  const url = new URL("https://geocoding-api.open-meteo.com/v1/reverse");
-  url.searchParams.set("latitude", String(lat));
-  url.searchParams.set("longitude", String(lon));
-  url.searchParams.set("language", "en");
+const NOMINATIM_USER_AGENT = "Peek/1.0";
+
+type NominatimAddress = {
+  city?: string;
+  town?: string;
+  village?: string;
+  municipality?: string;
+};
+
+type NominatimResponse = {
+  address?: NominatimAddress;
+  display_name?: string;
+};
+
+async function reverseGeocodeWithOpenWeather(
+  lat: number,
+  lon: number,
+  apiKey: string,
+): Promise<string | null> {
+  const url = new URL("https://api.openweathermap.org/geo/1.0/reverse");
+  url.searchParams.set("lat", String(lat));
+  url.searchParams.set("lon", String(lon));
+  url.searchParams.set("limit", "1");
+  url.searchParams.set("appid", apiKey);
 
   const response = await fetch(url.toString());
   if (!response.ok) {
-    return "Unknown location";
+    return null;
   }
 
   const data = await response.json();
-  const result = data.results?.[0];
-  return result?.name ?? result?.admin1 ?? "Unknown location";
+  const result = Array.isArray(data) ? data[0] : null;
+  if (!result?.name) {
+    return null;
+  }
+
+  const parts = [result.name, result.state, result.country].filter(Boolean);
+  return parts.length > 0 ? parts.join(", ") : result.name;
+}
+
+async function reverseGeocodeWithNominatim(lat: number, lon: number): Promise<string | null> {
+  const url = new URL("https://nominatim.openstreetmap.org/reverse");
+  url.searchParams.set("lat", String(lat));
+  url.searchParams.set("lon", String(lon));
+  url.searchParams.set("format", "json");
+  url.searchParams.set("addressdetails", "1");
+  url.searchParams.set("accept-language", "en");
+
+  const response = await fetch(url.toString(), {
+    headers: {
+      "User-Agent": NOMINATIM_USER_AGENT,
+    },
+  });
+  if (!response.ok) {
+    return null;
+  }
+
+  const data = (await response.json()) as NominatimResponse;
+  const address = data.address;
+  if (address) {
+    const name =
+      address.city || address.town || address.village || address.municipality;
+    if (name) {
+      return name;
+    }
+  }
+
+  if (data.display_name) {
+    return data.display_name.split(",")[0]?.trim() ?? null;
+  }
+
+  return null;
+}
+
+async function reverseGeocode(
+  lat: number,
+  lon: number,
+  apiKey?: string | null,
+): Promise<string> {
+  if (apiKey) {
+    const openWeather = await reverseGeocodeWithOpenWeather(lat, lon, apiKey);
+    if (openWeather) {
+      return openWeather;
+    }
+  }
+
+  const nominatim = await reverseGeocodeWithNominatim(lat, lon);
+  if (nominatim) {
+    return nominatim;
+  }
+
+  return "Unknown location";
 }
 
 export async function getWeatherConfig() {
@@ -132,14 +210,7 @@ export async function getWeather(options: WeatherOptions = {}): Promise<WeatherD
 
   let resolvedCity = city;
   if (settings.weatherUseCurrentLocation && !resolvedCity) {
-    if (
-      settings.weatherProvider === "openweather" &&
-      settings.openWeatherApiKey
-    ) {
-      resolvedCity = "";
-    } else {
-      resolvedCity = await reverseGeocode(lat, lon);
-    }
+    resolvedCity = await reverseGeocode(lat, lon, settings.openWeatherApiKey);
   }
 
   let data: WeatherData;

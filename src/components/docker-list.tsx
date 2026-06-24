@@ -56,7 +56,7 @@ export function DockerList() {
             className="flex items-center gap-4 py-4"
           >
             <div
-              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border bg-surface font-console text-xs text-muted ${dockerAvatarRingClass(container.state)}`}
+              className={`flex ml-2 h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border bg-surface font-console text-xs text-muted ${dockerAvatarRingClass(container.state)}`}
             >
               {getInitials(container.name)}
             </div>
@@ -73,7 +73,7 @@ export function DockerList() {
                 type="button"
                 onClick={() => runAction(container.id, "restart")}
                 disabled={acting === `${container.id}-restart`}
-                className="flex h-8 w-8 items-center justify-center rounded-full border border-border  font-console text-xs text-muted transition-opacity hover:opacity-80 disabled:opacity-40"
+                className="flex h-8 w-8 items-center cursor-pointer justify-center rounded-full border border-border  font-console text-xs text-muted transition-opacity hover:opacity-80 disabled:opacity-40"
                 title="Restart"
               >
                 ↻
@@ -83,7 +83,7 @@ export function DockerList() {
                   type="button"
                   onClick={() => runAction(container.id, "stop")}
                   disabled={acting === `${container.id}-stop`}
-                  className="flex h-8 w-8 items-center justify-center rounded-full border border-border bg-status-down/10 font-console text-xs text-status-down/80 transition-opacity hover:opacity-80 disabled:opacity-40"
+                  className="flex h-8 w-8 items-center cursor-pointer justify-center rounded-full border border-border bg-status-down/10 font-console text-xs text-status-down/80 transition-opacity hover:opacity-80 disabled:opacity-40"
                   title="Stop"
                 >
                   ■
@@ -93,7 +93,7 @@ export function DockerList() {
                   type="button"
                   onClick={() => runAction(container.id, "start")}
                   disabled={acting === `${container.id}-start`}
-                  className="flex h-8 w-8 items-center justify-center rounded-full border border-border bg-status-up/10 font-console text-xs text-status-up/80 transition-opacity hover:opacity-80 disabled:opacity-40"
+                  className="flex h-8 w-8 items-center cursor-pointer justify-center rounded-full border border-border bg-status-up/10 font-console text-xs text-status-up/80 transition-opacity hover:opacity-80 disabled:opacity-40"
                   title="Start"
                 >
                   ▶
