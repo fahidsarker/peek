@@ -22,10 +22,16 @@ Set `BETTER_AUTH_SECRET` to a long random string and adjust `DATABASE_URL` if ne
 
 ### 2. Database
 
-With Docker:
+Start Postgres (or use the full stack in [Docker deployment](#docker-deployment)):
 
 ```bash
-docker compose up -d db
+docker run -d --name peek-db \
+  -e POSTGRES_USER=peek \
+  -e POSTGRES_PASSWORD=peek \
+  -e POSTGRES_DB=peek \
+  -p 5432:5432 \
+  -v peek_pg_data:/var/lib/postgresql/data \
+  postgres:16-alpine
 ```
 
 Apply schema:
@@ -51,19 +57,62 @@ Open [http://localhost:3000](http://localhost:3000). The **first user to sign up
 
 ## Docker deployment
 
+Create a `docker-compose.yml` in the project root:
+
+```yaml
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: peek
+      POSTGRES_PASSWORD: peek
+      POSTGRES_DB: peek
+    volumes:
+      - peek_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U peek -d peek"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  peek:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgres://peek:peek@db:5432/peek
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-change-me-to-a-long-random-string}
+      BETTER_AUTH_URL: ${BETTER_AUTH_URL:-http://localhost:3000}
+      DOCKER_SOCKET_PATH: /var/run/docker.sock
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  peek_pg_data:
+```
+
+Then build and start:
+
 ```bash
 docker compose up -d --build
 ```
+
+On startup, the `peek` container runs `db:generate` and `db:migrate` before starting the app.
 
 The `peek` service mounts `/var/run/docker.sock` read-only for container controls. Ensure the container user can access the socket (add to the `docker` group or run with appropriate permissions).
 
 Set these in `.env` or compose environment:
 
-| Variable | Description |
-|----------|-------------|
-| `DATABASE_URL` | Postgres connection string |
-| `BETTER_AUTH_SECRET` | Session signing secret |
-| `BETTER_AUTH_URL` | Public URL of the app |
+| Variable             | Description                                         |
+| -------------------- | --------------------------------------------------- |
+| `DATABASE_URL`       | Postgres connection string                          |
+| `BETTER_AUTH_SECRET` | Session signing secret                              |
+| `BETTER_AUTH_URL`    | Public URL of the app                               |
 | `DOCKER_SOCKET_PATH` | Docker socket path (default `/var/run/docker.sock`) |
 
 ## Features
@@ -87,14 +136,14 @@ Set these in `.env` or compose environment:
 
 ## Scripts
 
-| Command | Description |
-|---------|-------------|
-| `bun run dev` | Start dev server |
-| `bun run build` | Production build |
+| Command               | Description                 |
+| --------------------- | --------------------------- |
+| `bun run dev`         | Start dev server            |
+| `bun run build`       | Production build            |
 | `bun run db:generate` | Generate Drizzle migrations |
-| `bun run db:migrate` | Apply migrations |
-| `bun run db:push` | Push schema to database |
-| `bun run db:studio` | Open Drizzle Studio |
+| `bun run db:migrate`  | Apply migrations            |
+| `bun run db:push`     | Push schema to database     |
+| `bun run db:studio`   | Open Drizzle Studio         |
 
 ## Fonts
 
