@@ -1,0 +1,18 @@
+{
+  "name": "peek",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "bun run --filter @peek/server dev & bun run --filter @peek/web dev",
+    "build": "bun run --filter @peek/web build && bun run --filter @peek/server build",
+    "start": "bun run --filter @peek/server start",
+    "db:generate": "bun run --filter @peek/db generate",
+    "db:migrate": "bun run --filter @peek/db migrate",
+    "db:push": "bun run --filter @peek/db push",
+    "db:studio": "bun run --filter @peek/db studio"
+  }
+}

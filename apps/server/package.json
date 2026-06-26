@@ -1,0 +1,27 @@
+{
+  "name": "@peek/server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun --env-file=../../.env run --watch src/index.ts",
+    "build": "bun build src/index.ts --outdir dist --target bun",
+    "start": "bun --env-file=../../.env run dist/index.js"
+  },
+  "dependencies": {
+    "@fastify/cookie": "^11.0.2",
+    "@fastify/cors": "^11.0.1",
+    "@fastify/static": "^8.2.0",
+    "@peek/db": "workspace:*",
+    "date-fns": "^4.4.0",
+    "dockerode": "^5.0.0",
+    "drizzle-orm": "^0.45.2",
+    "fastify": "^5.3.3",
+    "socket.io": "^4.8.1",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/dockerode": "^4.0.1",
+    "@types/bun": "latest"
+  }
+}

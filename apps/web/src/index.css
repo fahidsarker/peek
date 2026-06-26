@@ -1,0 +1,64 @@
+@import "tailwindcss";
+
+:root {
+  --background: #0c0c0c;
+  --foreground: #e8e8e8;
+  --muted: #888888;
+  --border: #2a2a2a;
+  --surface: #141414;
+  --accent: #c8f542;
+  --status-up: #4ade80;
+  --status-down: #f472b6;
+  --status-unknown: #666666;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-surface: var(--surface);
+  --color-accent: var(--accent);
+  --color-status-up: var(--status-up);
+  --color-status-down: var(--status-down);
+  --color-status-unknown: var(--status-unknown);
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-mono: "Inconsolata", monospace;
+  --font-display: "Poppins", sans-serif;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
+
+.font-console {
+  font-family: var(--font-mono);
+}
+
+.font-greeting {
+  font-family: var(--font-display);
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: fade-in 180ms ease-out forwards;
+}
+
+.scrollbar-hidden {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none;
+}
+
+button {
+  @apply cursor-pointer;
+}

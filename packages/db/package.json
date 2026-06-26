@@ -1,0 +1,23 @@
+{
+  "name": "@peek/db",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./schema": "./src/schema.ts"
+  },
+  "scripts": {
+    "generate": "bun --env-file=../../.env run drizzle-kit generate",
+    "migrate": "bun --env-file=../../.env run drizzle-kit migrate",
+    "push": "bun --env-file=../../.env run drizzle-kit push",
+    "studio": "bun --env-file=../../.env run drizzle-kit studio"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.45.2",
+    "postgres": "^3.4.9"
+  },
+  "devDependencies": {
+    "drizzle-kit": "^0.31.10"
+  }
+}
