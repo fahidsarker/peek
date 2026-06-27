@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { FadeIn } from "@/components/fade-in";
 import { CacheStatusLabel } from "@/components/cache-status-label";
-import { dockerAvatarRingClass, getInitials } from "@/lib/initials";
+import { getInitials } from "@/lib/initials";
 import { useDockerContainers } from "@/lib/hooks/use-docker-containers";
 
 export function DockerList() {
@@ -43,6 +43,9 @@ export function DockerList() {
     <FadeIn className="divide-y divide-border">
       {containers.map((container) => {
         const isRunning = container.state === "running";
+        const statusButtonClass = isRunning
+          ? "bg-status-up/10 text-status-up/80"
+          : "bg-status-down/10 text-status-down/80";
 
         return (
           <div
@@ -50,9 +53,7 @@ export function DockerList() {
             key={container.id}
             className="flex items-center gap-4 py-4"
           >
-            <div
-              className={`ml-2 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border bg-surface font-console text-xs text-muted ${dockerAvatarRingClass(container.state)}`}
-            >
+            <div className="ml-2 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border bg-surface font-console text-xs text-muted">
               {getInitials(container.name)}
             </div>
             <div className="min-w-0 flex-1">
@@ -78,7 +79,7 @@ export function DockerList() {
                   type="button"
                   onClick={() => runAction(container.id, "stop")}
                   disabled={acting === `${container.id}-stop`}
-                  className="flex h-8 w-8 items-center justify-center rounded-full border border-border bg-status-down/10 font-console text-xs text-status-down/80 transition-opacity hover:opacity-80 disabled:opacity-40"
+                  className={`flex h-8 w-8 items-center justify-center rounded-full border border-border font-console text-xs transition-opacity hover:opacity-80 disabled:opacity-40 ${statusButtonClass}`}
                   title="Stop"
                 >
                   ■
@@ -88,7 +89,7 @@ export function DockerList() {
                   type="button"
                   onClick={() => runAction(container.id, "start")}
                   disabled={acting === `${container.id}-start`}
-                  className="flex h-8 w-8 items-center justify-center rounded-full border border-border bg-status-up/10 font-console text-xs text-status-up/80 transition-opacity hover:opacity-80 disabled:opacity-40"
+                  className={`flex h-8 w-8 items-center justify-center rounded-full border border-border font-console text-xs transition-opacity hover:opacity-80 disabled:opacity-40 ${statusButtonClass}`}
                   title="Start"
                 >
                   ▶
