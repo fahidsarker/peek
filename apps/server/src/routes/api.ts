@@ -16,6 +16,7 @@ import { getAppsWithStatus } from "../services/ping";
 import { getSettings } from "../services/settings";
 import { getWeather, getWeatherConfig } from "../services/weather";
 import { getDockerContainersDetailed } from "../services/docker-containers";
+import { getSystemMetrics } from "../services/system-metrics";
 import {
   pauseContainer,
   restartContainer,
@@ -49,6 +50,12 @@ export function broadcastDockerContainers() {
 export function broadcastSettings() {
   getSettings().then((settings) => {
     io?.emit("settings:updated", { settings });
+  });
+}
+
+export function broadcastSystemMetrics() {
+  getSystemMetrics().then((metrics) => {
+    io?.emit("system:metrics", { metrics });
   });
 }
 
@@ -100,6 +107,12 @@ export async function registerApiRoutes(app: FastifyInstance) {
     } catch {
       return reply.status(500).send({ error: "Docker action failed" });
     }
+  });
+
+  app.get("/api/system/metrics", async (request, reply) => {
+    if (await requireAuth(request, reply)) return;
+    const metrics = await getSystemMetrics();
+    return reply.send({ metrics });
   });
 
   app.get("/api/weather", async (request, reply) => {

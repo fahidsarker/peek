@@ -4,6 +4,7 @@ import { DashboardSearch } from "@/components/dashboard-search";
 import { Clock } from "@/components/clock";
 import { DockerList, DockerListHeader } from "@/components/docker-list";
 import { FadeIn } from "@/components/fade-in";
+import { SystemInfo } from "@/components/system-info";
 import { WeatherWidget } from "@/components/weather-widget";
 import { useSession } from "@/lib/auth-context";
 
@@ -43,6 +44,7 @@ export function DashboardPage() {
         }`}
       >
         <section className="flex min-h-0 flex-col p-6 md:p-8">
+          <SystemInfo />
           <div className="mb-6 flex shrink-0 items-center gap-2">
             <h2 className="font-console text-sm text-muted">Apps</h2>
             <AppListHeader />

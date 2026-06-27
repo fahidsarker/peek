@@ -4,14 +4,17 @@ import { socketAuthMiddleware } from "../auth/socket";
 import { getAppsWithStatus } from "../services/ping";
 import { getDockerContainersDetailed } from "../services/docker-containers";
 import { getSettings } from "../services/settings";
+import { getSystemMetrics } from "../services/system-metrics";
 import {
   broadcastAppsStatus,
   broadcastDockerContainers,
+  broadcastSystemMetrics,
   setSocketServer,
 } from "../routes/api";
 
 const DOCKER_INTERVAL_MS = 15_000;
 const APPS_INTERVAL_MS = 60_000;
+const SYSTEM_METRICS_INTERVAL_MS = 2_000;
 
 export function createSocketServer(httpServer: HttpServer) {
   const clientOrigin = process.env.APP_URL ?? "http://localhost:5173";
@@ -46,6 +49,9 @@ export function createSocketServer(httpServer: HttpServer) {
 
     const settings = await getSettings();
     socket.emit("settings:updated", { settings });
+
+    const metrics = await getSystemMetrics();
+    socket.emit("system:metrics", { metrics });
   });
 
   setInterval(() => {
@@ -55,6 +61,10 @@ export function createSocketServer(httpServer: HttpServer) {
   setInterval(() => {
     broadcastAppsStatus();
   }, APPS_INTERVAL_MS);
+
+  setInterval(() => {
+    broadcastSystemMetrics();
+  }, SYSTEM_METRICS_INTERVAL_MS);
 
   return io;
 }

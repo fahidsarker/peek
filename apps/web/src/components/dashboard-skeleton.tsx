@@ -36,6 +36,7 @@ export function DashboardSkeleton({ hint }: { hint: SessionHint }) {
         }`}
       >
         <section className="flex min-h-0 flex-col p-6 md:p-8">
+          <Skeleton className="mb-6 h-28 w-full rounded-lg" />
           <div className="mb-6 flex shrink-0 items-center gap-2">
             <span className="font-console text-sm text-muted">Apps</span>
             <Skeleton className="h-3 w-3 rounded-full" />

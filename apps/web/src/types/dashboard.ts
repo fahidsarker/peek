@@ -13,6 +13,17 @@ export type ContainerItem = {
   runningFor: string | null;
 };
 
+export type SystemMetrics = {
+  cpuPercent: number;
+  ramUsedBytes: number;
+  ramTotalBytes: number;
+  ramPercent: number;
+  diskFreeBytes: number;
+  diskTotalBytes: number;
+  netRxBytesPerSec: number | null;
+  netTxBytesPerSec: number | null;
+};
+
 export type AuthUser = {
   id: string;
   name: string;
