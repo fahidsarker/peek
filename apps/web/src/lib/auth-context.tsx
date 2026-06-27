@@ -9,6 +9,10 @@ import {
 import type { SessionResponse } from "@/types/dashboard";
 import { CacheProvider } from "./cache/cache-context";
 import { clearUserCache } from "./cache/store";
+import {
+  clearSessionHint,
+  writeSessionHint,
+} from "./session-hint";
 import { connectSocket, disconnectSocket } from "./socket";
 
 type AuthContextValue = {
@@ -25,12 +29,25 @@ async function fetchSession(): Promise<SessionResponse> {
   return res.json();
 }
 
+function syncSessionHint(data: SessionResponse) {
+  if (data.user) {
+    writeSessionHint({
+      name: data.user.name,
+      showDocker: data.user.showDocker,
+      appsCompactView: data.settings?.appsCompactView ?? true,
+    });
+  } else {
+    clearSessionHint();
+  }
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<SessionResponse | null>(null);
   const [loading, setLoading] = useState(true);
 
   const refreshSession = useCallback(async () => {
     const data = await fetchSession();
+    syncSessionHint(data);
     setSession(data);
     return;
   }, []);
@@ -38,6 +55,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     fetchSession()
       .then((data) => {
+        syncSessionHint(data);
         setSession(data);
         if (data.user) {
           connectSocket();
@@ -52,6 +70,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       clearUserCache(userId);
     }
     disconnectSocket();
+    clearSessionHint();
     await fetch("/api/auth/logout", {
       method: "POST",
       credentials: "include",
