@@ -97,7 +97,7 @@ export function AdminPanel({ currentUserId }: { currentUserId: string }) {
           <input
             ref={importInputRef}
             type="file"
-            accept=".json,application/json"
+            accept="application/json"
             className="hidden"
             onChange={async (e) => {
               const file = e.target.files?.[0];
