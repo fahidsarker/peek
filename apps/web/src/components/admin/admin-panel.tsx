@@ -1,6 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { SortableAppList } from "@/components/admin/sortable-app-list";
 import { FadeIn } from "@/components/fade-in";
+import {
+  exportAppsToFile,
+  importAppsFromFile,
+  parseAppsImportFile,
+} from "@/lib/apps-import-export";
 import { useAdminData } from "@/lib/hooks/use-admin-data";
 
 async function apiPost(path: string, body: unknown) {
@@ -36,6 +41,8 @@ export function AdminPanel({ currentUserId }: { currentUserId: string }) {
   const [message, setMessage] = useState<string | null>(null);
   const [useCurrentLocation, setUseCurrentLocation] = useState(false);
   const [pending, setPending] = useState(false);
+  const [importMode, setImportMode] = useState<"replace" | "append">("append");
+  const importInputRef = useRef<HTMLInputElement>(null);
 
   const settings = adminData?.settings;
   const apps = adminData?.apps ?? [];
@@ -57,6 +64,75 @@ export function AdminPanel({ currentUserId }: { currentUserId: string }) {
 
       <section className="space-y-4">
         <h2 className="font-console text-sm text-muted">Apps</h2>
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            onClick={() => exportAppsToFile(apps)}
+            className="rounded border border-border px-4 py-2 font-console text-sm"
+          >
+            Export
+          </button>
+          <div>
+            <span className="font-console text-xs text-muted">|</span>
+          </div>
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() => importInputRef.current?.click()}
+            className="rounded border border-border px-4 py-2 font-console text-sm disabled:opacity-50"
+          >
+            Import
+          </button>
+          <select
+            value={importMode}
+            onChange={(e) =>
+              setImportMode(e.target.value as "replace" | "append")
+            }
+            className="rounded border border-border bg-surface px-3 py-2 font-console text-sm"
+          >
+            <option value="append">Append</option>
+            <option value="replace">Replace</option>
+          </select>
+
+          <input
+            ref={importInputRef}
+            type="file"
+            accept=".json,application/json"
+            className="hidden"
+            onChange={async (e) => {
+              const file = e.target.files?.[0];
+              e.target.value = "";
+              if (!file) return;
+
+              if (
+                importMode === "replace" &&
+                !window.confirm(
+                  "Replace the current app list with the imported file? This cannot be undone.",
+                )
+              ) {
+                return;
+              }
+
+              setPending(true);
+              const text = await file.text();
+              const parsed = parseAppsImportFile(text);
+              if (!parsed.ok) {
+                setMessage(parsed.error);
+                setPending(false);
+                return;
+              }
+
+              const result = await importAppsFromFile(parsed.apps, importMode);
+              setMessage(
+                "error" in result
+                  ? result.error
+                  : `Imported ${result.imported} app${result.imported === 1 ? "" : "s"}`,
+              );
+              await refresh();
+              setPending(false);
+            }}
+          />
+        </div>
         <form
           onSubmit={async (e) => {
             e.preventDefault();

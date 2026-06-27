@@ -4,6 +4,7 @@ import {
   deleteApp,
   deleteUser,
   getAdminData,
+  importApps,
   reorderApps,
   toggleUserAdmin,
   toggleUserDocker,
@@ -129,6 +130,14 @@ export async function registerApiRoutes(app: FastifyInstance) {
   app.post("/api/admin/apps", async (request, reply) => {
     if (await requireAdmin(request, reply)) return;
     const result = await createApp(request.user!, request.body);
+    if ("error" in result) return reply.status(400).send(result);
+    broadcastAppsStatus();
+    return reply.send(result);
+  });
+
+  app.post("/api/admin/apps/import", async (request, reply) => {
+    if (await requireAdmin(request, reply)) return;
+    const result = await importApps(request.user!, request.body);
     if ("error" in result) return reply.status(400).send(result);
     broadcastAppsStatus();
     return reply.send(result);

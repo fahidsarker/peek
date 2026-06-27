@@ -57,6 +57,56 @@ export async function deleteApp(id: string) {
   return { ok: true as const };
 }
 
+const importAppsSchema = z.object({
+  mode: z.enum(["replace", "append"]),
+  apps: z.array(appSchema),
+});
+
+function buildAppRows(
+  parsedApps: z.infer<typeof appSchema>[],
+  startSortOrder: number,
+  userId: string,
+) {
+  return parsedApps.map((app, index) => ({
+    id: crypto.randomUUID(),
+    title: app.title,
+    iconUrl: app.iconUrl,
+    publicUrl: app.publicUrl,
+    pingUrl: app.pingUrl || null,
+    sortOrder: startSortOrder + index,
+    createdBy: userId,
+    updatedBy: userId,
+  }));
+}
+
+export async function importApps(user: AuthUser, body: unknown) {
+  const parsed = importAppsSchema.safeParse(body);
+  if (!parsed.success) return { error: "Invalid app data" };
+
+  const { mode, apps: parsedApps } = parsed.data;
+
+  if (mode === "replace") {
+    await db.transaction(async (tx) => {
+      await tx.delete(apps);
+      if (parsedApps.length > 0) {
+        await tx.insert(apps).values(buildAppRows(parsedApps, 0, user.id));
+      }
+    });
+  } else {
+    const [result] = await db
+      .select({ maxOrder: max(apps.sortOrder) })
+      .from(apps);
+    const startSortOrder = (result?.maxOrder ?? -1) + 1;
+    if (parsedApps.length > 0) {
+      await db
+        .insert(apps)
+        .values(buildAppRows(parsedApps, startSortOrder, user.id));
+    }
+  }
+
+  return { ok: true as const, imported: parsedApps.length };
+}
+
 export async function reorderApps(user: AuthUser, orderedIds: string[]) {
   const existing = await db.query.apps.findMany({ columns: { id: true } });
   const existingIds = new Set(existing.map((a) => a.id));
