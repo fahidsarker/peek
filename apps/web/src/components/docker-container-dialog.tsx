@@ -54,7 +54,7 @@ function DockerContainerDialogSkeleton({
         <button
           type="button"
           onClick={onClose}
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border font-console text-xs text-muted transition-opacity hover:opacity-80"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border font-console text-xs text-muted transition-opacity hover:opacity-80 md:h-8 md:w-8"
           title="Close"
         >
           ✕
@@ -120,7 +120,7 @@ function DialogBody({
         <button
           type="button"
           onClick={onClose}
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border font-console text-xs text-muted transition-opacity hover:opacity-80"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border font-console text-xs text-muted transition-opacity hover:opacity-80 md:h-8 md:w-8"
           title="Close"
         >
           ✕
@@ -169,7 +169,7 @@ function DialogBody({
           type="button"
           onClick={() => onAction("restart")}
           disabled={acting === "restart"}
-          className="flex h-8 w-8 items-center justify-center rounded-full border border-border font-console text-xs text-muted transition-opacity hover:opacity-80 disabled:opacity-40"
+          className="flex h-10 w-10 items-center justify-center rounded-full border border-border font-console text-xs text-muted transition-opacity hover:opacity-80 disabled:opacity-40 md:h-8 md:w-8"
           title="Restart"
         >
           ↻
@@ -179,7 +179,7 @@ function DialogBody({
             type="button"
             onClick={() => onAction("stop")}
             disabled={acting === "stop"}
-            className={`flex h-8 w-8 items-center justify-center rounded-full border border-border font-console text-xs transition-opacity hover:opacity-80 disabled:opacity-40 ${statusButtonClass}`}
+            className={`flex h-10 w-10 items-center justify-center rounded-full border border-border font-console text-xs transition-opacity hover:opacity-80 disabled:opacity-40 md:h-8 md:w-8 ${statusButtonClass}`}
             title="Stop"
           >
             ■
@@ -189,7 +189,7 @@ function DialogBody({
             type="button"
             onClick={() => onAction("start")}
             disabled={acting === "start"}
-            className={`flex h-8 w-8 items-center justify-center rounded-full border border-border font-console text-xs transition-opacity hover:opacity-80 disabled:opacity-40 ${statusButtonClass}`}
+            className={`flex h-10 w-10 items-center justify-center rounded-full border border-border font-console text-xs transition-opacity hover:opacity-80 disabled:opacity-40 md:h-8 md:w-8 ${statusButtonClass}`}
             title="Start"
           >
             ▶
@@ -252,14 +252,14 @@ export function DockerContainerDialog({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-4 md:items-center"
       onClick={close}
     >
       <div
         role="dialog"
         aria-modal="true"
         aria-label="Container details"
-        className="w-full max-w-md overflow-hidden rounded-2xl border border-border bg-surface shadow-lg"
+        className="max-h-[85dvh] w-full max-w-md overflow-y-auto rounded-2xl border border-border bg-surface shadow-lg"
         onClick={(e) => e.stopPropagation()}
       >
         {data ? (
