@@ -6,7 +6,7 @@ export function Skeleton({
 }: HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={`animate-pulse rounded bg-surface ${className}`.trim()}
+      className={`skeleton-shimmer rounded ${className}`.trim()}
       {...props}
     />
   );

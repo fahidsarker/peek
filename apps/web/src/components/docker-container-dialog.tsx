@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { Skeleton } from "@/components/skeleton";
 import { dockerAvatarRingClass, getInitials } from "@/lib/initials";
 import { useDockerContainerDetail } from "@/lib/hooks/use-docker-container-detail";
 import type { ContainerDetails } from "@/types/dashboard";
@@ -23,6 +24,64 @@ function DetailRow({ label, value }: { label: string; value: string }) {
       <span className="font-console text-xs text-muted">{label}</span>
       <span className="truncate text-right text-sm">{value}</span>
     </div>
+  );
+}
+
+function DetailRowSkeleton() {
+  return (
+    <div className="flex items-center justify-between gap-4 py-2">
+      <Skeleton className="h-3 w-16" />
+      <Skeleton className="h-3 w-24" />
+    </div>
+  );
+}
+
+function DockerContainerDialogSkeleton({
+  canControl,
+  onClose,
+}: {
+  canControl: boolean;
+  onClose: () => void;
+}) {
+  return (
+    <>
+      <div className="flex items-start gap-4 border-b border-border px-6 py-4">
+        <Skeleton className="h-10 w-10 shrink-0 rounded-full" />
+        <div className="min-w-0 flex-1 space-y-2">
+          <Skeleton className="h-4 w-40" />
+          <Skeleton className="h-3 w-20" />
+        </div>
+        <button
+          type="button"
+          onClick={onClose}
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border font-console text-xs text-muted transition-opacity hover:opacity-80"
+          title="Close"
+        >
+          ✕
+        </button>
+      </div>
+
+      <div className="divide-y divide-border px-6">
+        <div className="py-3">
+          <DetailRowSkeleton />
+          <DetailRowSkeleton />
+          <DetailRowSkeleton />
+          <DetailRowSkeleton />
+        </div>
+        <div className="py-3">
+          <Skeleton className="mb-2 h-3 w-20" />
+          <DetailRowSkeleton />
+          <DetailRowSkeleton />
+        </div>
+      </div>
+
+      {canControl && (
+        <div className="flex justify-end gap-2 border-t border-border px-6 py-4">
+          <Skeleton className="h-8 w-8 rounded-full" />
+          <Skeleton className="h-8 w-8 rounded-full" />
+        </div>
+      )}
+    </>
   );
 }
 
@@ -203,17 +262,7 @@ export function DockerContainerDialog({
         className="w-full max-w-md overflow-hidden rounded-2xl border border-border bg-surface shadow-lg"
         onClick={(e) => e.stopPropagation()}
       >
-        {status === "loading" && !data ? (
-          <div className="px-6 py-8">
-            <p className="font-console text-sm text-muted">Loading...</p>
-          </div>
-        ) : status === "error" ? (
-          <div className="px-6 py-8">
-            <p className="font-console text-sm text-status-down">
-              {error?.message ?? "Failed to load container"}
-            </p>
-          </div>
-        ) : data ? (
+        {data ? (
           <DialogBody
             data={data}
             acting={acting}
@@ -221,7 +270,15 @@ export function DockerContainerDialog({
             onClose={close}
             onAction={runAction}
           />
-        ) : null}
+        ) : status === "error" ? (
+          <div className="px-6 py-8">
+            <p className="font-console text-sm text-status-down">
+              {error?.message ?? "Failed to load container"}
+            </p>
+          </div>
+        ) : (
+          <DockerContainerDialogSkeleton canControl={canControl} onClose={close} />
+        )}
       </div>
     </div>
   );

@@ -68,7 +68,13 @@ function groupResults(results: SearchResult[]) {
   return groups;
 }
 
-export function DashboardSearch({ showDocker }: { showDocker: boolean }) {
+export function DashboardSearch({
+  showDocker,
+  onSelectContainer,
+}: {
+  showDocker: boolean;
+  onSelectContainer?: (id: string) => void;
+}) {
   const navigate = useNavigate();
   const triggerRef = useRef<HTMLButtonElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -112,6 +118,7 @@ export function DashboardSearch({ showDocker }: { showDocker: boolean }) {
       if (result.type === "app") {
         window.open(result.app.publicUrl, "_blank", "noopener,noreferrer");
       } else if (result.type === "docker") {
+        onSelectContainer?.(result.container.id);
         document
           .getElementById(`docker-${result.container.id}`)
           ?.scrollIntoView({ block: "nearest" });
@@ -120,7 +127,7 @@ export function DashboardSearch({ showDocker }: { showDocker: boolean }) {
       }
       close();
     },
-    [close, navigate],
+    [close, navigate, onSelectContainer],
   );
 
   useEffect(() => {

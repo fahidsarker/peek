@@ -1,17 +1,19 @@
 import { useState } from "react";
 import { FadeIn } from "@/components/fade-in";
 import { CacheStatusLabel } from "@/components/cache-status-label";
-import { DockerContainerDialog } from "@/components/docker-container-dialog";
 import { dockerAvatarRingClass, getInitials } from "@/lib/initials";
 import { useSession } from "@/lib/auth-context";
 import { useDockerContainers } from "@/lib/hooks/use-docker-containers";
 
-export function DockerList() {
+export function DockerList({
+  onSelectContainer,
+}: {
+  onSelectContainer: (id: string) => void;
+}) {
   const { user } = useSession();
   const canControl = user?.isAdmin ?? false;
   const { data: containers = [], status, error, refresh } = useDockerContainers();
   const [acting, setActing] = useState<string | null>(null);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   async function runAction(id: string, action: string) {
     setActing(`${id}-${action}`);
@@ -61,7 +63,7 @@ export function DockerList() {
             >
               <button
                 type="button"
-                onClick={() => setSelectedId(container.id)}
+                onClick={() => onSelectContainer(container.id)}
                 className="flex min-w-0 flex-1 items-center gap-4 text-left transition-opacity hover:opacity-80"
               >
                 <div
@@ -116,13 +118,6 @@ export function DockerList() {
           );
       })}
       </FadeIn>
-
-      <DockerContainerDialog
-        containerId={selectedId}
-        canControl={canControl}
-        onClose={() => setSelectedId(null)}
-        onContainersRefresh={refresh}
-      />
     </>
   );
 }
