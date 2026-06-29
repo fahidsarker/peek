@@ -13,5 +13,5 @@ export function getInitials(name: string): string {
 export function dockerAvatarRingClass(state: string): string {
   if (state === "running") return "ring-1 ring-status-up/40";
   if (state === "paused") return "ring-2 ring-status-unknown/40";
-  return "";
+  return "ring-1 ring-status-down/40";
 }

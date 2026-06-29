@@ -15,7 +15,7 @@ import { requireAdmin, requireAuth } from "../auth/middleware";
 import { getAppsWithStatus } from "../services/ping";
 import { getSettings } from "../services/settings";
 import { getWeather, getWeatherConfig } from "../services/weather";
-import { getDockerContainersDetailed } from "../services/docker-containers";
+import { getDockerContainersDetailed, getDockerContainerDetail } from "../services/docker-containers";
 import {
   pauseContainer,
   restartContainer,
@@ -70,8 +70,23 @@ export async function registerApiRoutes(app: FastifyInstance) {
     }
   });
 
+  app.get("/api/docker/containers/:id", async (request, reply) => {
+    if (await requireDocker(request, reply)) return;
+    const { id } = request.params as { id: string };
+
+    try {
+      const container = await getDockerContainerDetail(id);
+      return reply.send({ container });
+    } catch {
+      return reply.status(404).send({ error: "Container not found" });
+    }
+  });
+
   app.post("/api/docker/containers/:id/:action", async (request, reply) => {
     if (await requireDocker(request, reply)) return;
+    if (!request.user?.isAdmin) {
+      return reply.status(403).send({ error: "Forbidden" });
+    }
     const { id, action } = request.params as { id: string; action: string };
 
     try {

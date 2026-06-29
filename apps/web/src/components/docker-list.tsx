@@ -1,12 +1,17 @@
 import { useState } from "react";
 import { FadeIn } from "@/components/fade-in";
 import { CacheStatusLabel } from "@/components/cache-status-label";
-import { getInitials } from "@/lib/initials";
+import { DockerContainerDialog } from "@/components/docker-container-dialog";
+import { dockerAvatarRingClass, getInitials } from "@/lib/initials";
+import { useSession } from "@/lib/auth-context";
 import { useDockerContainers } from "@/lib/hooks/use-docker-containers";
 
 export function DockerList() {
+  const { user } = useSession();
+  const canControl = user?.isAdmin ?? false;
   const { data: containers = [], status, error, refresh } = useDockerContainers();
   const [acting, setActing] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   async function runAction(id: string, action: string) {
     setActing(`${id}-${action}`);
@@ -40,31 +45,41 @@ export function DockerList() {
   }
 
   return (
-    <FadeIn className="divide-y divide-border">
-      {containers.map((container) => {
-        const isRunning = container.state === "running";
-        const statusButtonClass = isRunning
-          ? "bg-status-up/10 text-status-up/80"
-          : "bg-status-down/10 text-status-down/80";
+    <>
+      <FadeIn className="divide-y divide-border">
+        {containers.map((container) => {
+          const isRunning = container.state === "running";
+          const statusButtonClass = isRunning
+            ? "bg-status-up/10 text-status-up/80"
+            : "bg-status-down/10 text-status-down/80";
 
-        return (
-          <div
-            id={`docker-${container.id}`}
-            key={container.id}
-            className="flex items-center gap-4 py-4"
-          >
-            <div className="ml-2 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border bg-surface font-console text-xs text-muted">
-              {getInitials(container.name)}
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm">{container.name}</p>
-              <p className="font-console text-xs text-muted">
-                {isRunning && container.runningFor
-                  ? `Running for ${container.runningFor}`
-                  : container.state}
-              </p>
-            </div>
-            <div className="flex shrink-0 gap-2">
+          return (
+            <div
+              id={`docker-${container.id}`}
+              key={container.id}
+              className="flex items-center gap-4 py-4"
+            >
+              <button
+                type="button"
+                onClick={() => setSelectedId(container.id)}
+                className="flex min-w-0 flex-1 items-center gap-4 text-left transition-opacity hover:opacity-80"
+              >
+                <div
+                  className={`ml-2 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border bg-surface font-console text-xs text-muted ${!canControl ? dockerAvatarRingClass(container.state) : ""}`}
+                >
+                  {getInitials(container.name)}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm">{container.name}</p>
+                  <p className="font-console text-xs text-muted">
+                    {isRunning && container.runningFor
+                      ? `Running for ${container.runningFor}`
+                      : container.state}
+                  </p>
+                </div>
+              </button>
+              {canControl && (
+              <div className="flex shrink-0 gap-2">
               <button
                 type="button"
                 onClick={() => runAction(container.id, "restart")}
@@ -95,11 +110,20 @@ export function DockerList() {
                   ▶
                 </button>
               )}
+              </div>
+              )}
             </div>
-          </div>
-        );
+          );
       })}
-    </FadeIn>
+      </FadeIn>
+
+      <DockerContainerDialog
+        containerId={selectedId}
+        canControl={canControl}
+        onClose={() => setSelectedId(null)}
+        onContainersRefresh={refresh}
+      />
+    </>
   );
 }
 

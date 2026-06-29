@@ -13,6 +13,24 @@ export type ContainerItem = {
   runningFor: string | null;
 };
 
+export type ContainerStats = {
+  cpuPercent: number;
+  memoryUsage: number;
+  memoryLimit: number;
+};
+
+export type ContainerDetails = {
+  id: string;
+  shortId: string;
+  name: string;
+  image: string;
+  state: string;
+  status: string;
+  startedAt: string | null;
+  runningFor: string | null;
+  stats: ContainerStats | null;
+};
+
 export type AuthUser = {
   id: string;
   name: string;

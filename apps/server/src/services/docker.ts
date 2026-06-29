@@ -34,17 +34,57 @@ export async function listContainers(): Promise<ContainerInfo[]> {
   }));
 }
 
+export type ContainerStats = {
+  cpuPercent: number;
+  memoryUsage: number;
+  memoryLimit: number;
+};
+
 export async function getContainerDetails(id: string) {
   const docker = getDocker();
   const container = docker.getContainer(id);
   const inspect = await container.inspect();
   return {
     id: inspect.Id,
+    shortId: inspect.Id.slice(0, 12),
     name: inspect.Name.replace(/^\//, ""),
     image: inspect.Config.Image,
     state: inspect.State.Status,
+    status: inspect.State.Status,
     startedAt: inspect.State.StartedAt || null,
   };
+}
+
+export async function getContainerStats(
+  id: string,
+): Promise<ContainerStats | null> {
+  try {
+    const docker = getDocker();
+    const stats = await docker.getContainer(id).stats({ stream: false });
+
+    const cpuDelta =
+      stats.cpu_stats.cpu_usage.total_usage -
+      stats.precpu_stats.cpu_usage.total_usage;
+    const systemDelta =
+      stats.cpu_stats.system_cpu_usage - stats.precpu_stats.system_cpu_usage;
+    const onlineCpus = stats.cpu_stats.online_cpus ?? 1;
+
+    let cpuPercent = 0;
+    if (systemDelta > 0 && cpuDelta > 0) {
+      cpuPercent = (cpuDelta / systemDelta) * onlineCpus * 100;
+    }
+
+    const memoryUsage = stats.memory_stats?.usage ?? 0;
+    const memoryLimit = stats.memory_stats?.limit ?? 0;
+
+    return {
+      cpuPercent: Math.round(cpuPercent * 100) / 100,
+      memoryUsage,
+      memoryLimit,
+    };
+  } catch {
+    return null;
+  }
 }
 
 export async function restartContainer(id: string) {
