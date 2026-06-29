@@ -26,12 +26,12 @@ export function WeatherWidget() {
 
   return (
     <FadeIn>
-      <div className="mt-4 inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2 font-console text-xs">
-        <span className="text-foreground">{weather.city}</span>
+      <div className="mt-4 inline-flex max-w-full items-center gap-2 truncate rounded-lg border border-border px-4 py-2 font-console text-xs">
+        <span className="truncate text-foreground">{weather.city}</span>
         <span className="text-muted">·</span>
         <span>{Math.round(weather.temperature)}°C</span>
         <span className="text-muted">·</span>
-        <span className="text-muted">{weather.description}</span>
+        <span className="hidden text-muted sm:inline">{weather.description}</span>
         <CacheStatusLabel status={status} />
       </div>
     </FadeIn>

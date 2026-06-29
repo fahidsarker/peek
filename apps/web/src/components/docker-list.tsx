@@ -59,7 +59,7 @@ export function DockerList({
             <div
               id={`docker-${container.id}`}
               key={container.id}
-              className="flex items-center gap-4 py-4"
+              className="flex items-center gap-4 py-3 md:py-4"
             >
               <button
                 type="button"
@@ -86,7 +86,7 @@ export function DockerList({
                 type="button"
                 onClick={() => runAction(container.id, "restart")}
                 disabled={acting === `${container.id}-restart`}
-                className="flex h-8 w-8 items-center justify-center rounded-full border border-border font-console text-xs text-muted transition-opacity hover:opacity-80 disabled:opacity-40"
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-border font-console text-xs text-muted transition-opacity hover:opacity-80 disabled:opacity-40 md:h-8 md:w-8"
                 title="Restart"
               >
                 ↻
@@ -96,7 +96,7 @@ export function DockerList({
                   type="button"
                   onClick={() => runAction(container.id, "stop")}
                   disabled={acting === `${container.id}-stop`}
-                  className={`flex h-8 w-8 items-center justify-center rounded-full border border-border font-console text-xs transition-opacity hover:opacity-80 disabled:opacity-40 ${statusButtonClass}`}
+                  className={`flex h-10 w-10 items-center justify-center rounded-full border border-border font-console text-xs transition-opacity hover:opacity-80 disabled:opacity-40 md:h-8 md:w-8 ${statusButtonClass}`}
                   title="Stop"
                 >
                   ■
@@ -106,7 +106,7 @@ export function DockerList({
                   type="button"
                   onClick={() => runAction(container.id, "start")}
                   disabled={acting === `${container.id}-start`}
-                  className={`flex h-8 w-8 items-center justify-center rounded-full border border-border font-console text-xs transition-opacity hover:opacity-80 disabled:opacity-40 ${statusButtonClass}`}
+                  className={`flex h-10 w-10 items-center justify-center rounded-full border border-border font-console text-xs transition-opacity hover:opacity-80 disabled:opacity-40 md:h-8 md:w-8 ${statusButtonClass}`}
                   title="Start"
                 >
                   ▶

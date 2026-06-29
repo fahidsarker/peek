@@ -190,10 +190,12 @@ export function DashboardSearch({
         ref={triggerRef}
         type="button"
         onClick={() => setOpen(true)}
-        className="flex h-10 items-center gap-3 rounded-full border border-border px-4 font-console text-sm text-muted transition-opacity hover:opacity-80"
+        className="flex h-10 flex-1 items-center justify-center gap-2 rounded-full border border-border px-4 font-console text-sm text-muted transition-opacity hover:opacity-80 md:flex-none md:justify-start"
       >
-        <span>Search...</span>
-        <kbd className="rounded border border-border px-1.5 py-0.5 text-xs">
+        <span aria-hidden>⌕</span>
+        <span className="md:hidden">Search</span>
+        <span className="hidden md:inline">Search...</span>
+        <kbd className="hidden rounded border border-border px-1.5 py-0.5 text-xs md:inline">
           {isMac ? "⌘K" : "Ctrl+K"}
         </kbd>
       </button>

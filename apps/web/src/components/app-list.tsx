@@ -41,7 +41,7 @@ export function AppList({ compact = true }: { compact?: boolean }) {
             href={app.publicUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-4 py-2 transition-opacity hover:opacity-80"
+            className="flex items-center gap-4 py-2.5 transition-opacity hover:opacity-80 md:py-2"
           >
             <div className="flex min-w-0 flex-1 items-center gap-2">
               <img
@@ -51,7 +51,7 @@ export function AppList({ compact = true }: { compact?: boolean }) {
               />
               <p className="truncate text-sm">{app.title}</p>
             </div>
-            <p className="truncate font-console text-xs text-muted">
+            <p className="hidden truncate font-console text-xs text-muted md:block">
               {app.publicUrl}
             </p>
             <StatusDot status={app.lastPingStatus} />
