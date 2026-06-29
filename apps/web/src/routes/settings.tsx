@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { AdminPanel } from "@/components/admin/admin-panel";
 import { LogoutButton } from "@/components/settings/logout-button";
+import { ProjectLinks } from "@/components/settings/project-links";
 import { useSession } from "@/lib/auth-context";
 
 export function SettingsPage() {
@@ -15,12 +16,15 @@ export function SettingsPage() {
           <p className="font-console text-sm text-muted">peek</p>
           <h1 className="font-greeting text-2xl">Settings</h1>
         </div>
-        <Link
-          to="/"
-          className="font-console text-sm text-muted underline transition-opacity hover:opacity-80"
-        >
-          Back to dashboard
-        </Link>
+        <div className="flex items-center gap-2">
+          <ProjectLinks />
+          <Link
+            to="/"
+            className="font-console text-sm text-muted underline transition-opacity hover:opacity-80"
+          >
+            Back to dashboard
+          </Link>
+        </div>
       </div>
 
       <div className="space-y-12">
