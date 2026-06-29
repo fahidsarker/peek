@@ -1,6 +1,13 @@
-# peek
+<p align="center">
+  <img src="https://github.com/fahidsarker/peek/blob/main/assets/banner.png" alt="peek — ultra-minimal NAS dashboard" width="100%" />
+</p>
 
-Ultra-minimal dashboard for NAS or self-hosted servers.
+<p align="center">
+  Ultra-minimal dashboard for NAS or self-hosted servers.<br />
+  Welcome header with date, time, and weather; user-managed app shortcuts with health pings; Docker container list with restart and pause/start controls.
+</p>
+
+---
 
 ## Stack
 
@@ -99,13 +106,13 @@ docker compose up -d --build
 
 ## Environment variables
 
-| Variable | Description |
-|----------|-------------|
-| `DATABASE_URL` | Postgres connection string |
-| `SESSION_SECRET` | Secret for cookie signing |
-| `APP_URL` | Client origin for CORS (dev: `http://localhost:5173`, prod: `http://localhost:3000`) |
-| `PORT` | Server port (default `3000`) |
-| `DOCKER_SOCKET_PATH` | Docker socket path (default `/var/run/docker.sock`) |
+| Variable             | Description                                                                          |
+| -------------------- | ------------------------------------------------------------------------------------ |
+| `DATABASE_URL`       | Postgres connection string                                                           |
+| `SESSION_SECRET`     | Secret for cookie signing                                                            |
+| `APP_URL`            | Client origin for CORS (dev: `http://localhost:5173`, prod: `http://localhost:3000`) |
+| `PORT`               | Server port (default `3000`)                                                         |
+| `DOCKER_SOCKET_PATH` | Docker socket path (default `/var/run/docker.sock`)                                  |
 
 ## Real-time updates
 
