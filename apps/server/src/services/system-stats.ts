@@ -1,18 +1,7 @@
 import si from "systeminformation";
+import { getHostSystemStats } from "./host-system-stats";
 
-export type SystemStats = {
-  cpuPercent: number;
-  memoryPercent: number;
-  memoryUsed: number;
-  memoryTotal: number;
-  uptimeSeconds: number;
-  storagePercent: number;
-  storageUsed: number;
-  storageTotal: number;
-  networkRxRate: number;
-  networkTxRate: number;
-  networkPercent: number;
-};
+export type { SystemStats } from "./system-stats.types";
 
 const DEFAULT_LINK_SPEED_BYTES_PER_SEC = 1_000_000_000 / 8; // 1 Gbps
 
@@ -47,6 +36,10 @@ async function getLinkSpeedBytesPerSec(): Promise<number> {
 }
 
 export async function getSystemStats(): Promise<SystemStats> {
+  if (process.env.HOST_PROC_ROOT) {
+    return getHostSystemStats();
+  }
+
   const [load, memory, time, filesystems, networkStats, networkInterfaces, linkSpeed] =
     await Promise.all([
       si.currentLoad(),
