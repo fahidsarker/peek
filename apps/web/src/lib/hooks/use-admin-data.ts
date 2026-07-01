@@ -22,6 +22,7 @@ type UserRow = {
 type SettingsRow = {
   allowSignups: boolean;
   appsCompactView: boolean;
+  showSystemInfo: boolean;
   weatherProvider: string;
   weatherUseCurrentLocation: boolean;
   weatherCity: string | null;

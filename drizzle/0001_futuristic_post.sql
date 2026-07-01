@@ -1,0 +1,1 @@
+ALTER TABLE "settings" ADD COLUMN "show_system_info" boolean DEFAULT true NOT NULL;

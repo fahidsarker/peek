@@ -11,7 +11,7 @@ import {
   updateApp,
   updateSettings,
 } from "../services/admin";
-import { requireAdmin, requireAuth } from "../auth/middleware";
+import { requireAdmin, requireAuth, requireDocker } from "../auth/middleware";
 import { getAppsWithStatus } from "../services/ping";
 import { getSettings } from "../services/settings";
 import { getWeather, getWeatherConfig } from "../services/weather";
@@ -23,7 +23,7 @@ import {
   stopContainer,
   unpauseContainer,
 } from "../services/docker";
-import { requireDocker } from "../auth/middleware";
+import { getSystemStats } from "../services/system-stats";
 import type { Server } from "socket.io";
 
 let io: Server | null = null;
@@ -50,6 +50,20 @@ export function broadcastSettings() {
   getSettings().then((settings) => {
     io?.emit("settings:updated", { settings });
   });
+}
+
+export function broadcastSystemStats() {
+  getSettings()
+    .then((settings) => {
+      if (!settings.showSystemInfo) return null;
+      return getSystemStats();
+    })
+    .then((stats) => {
+      if (stats) {
+        io?.emit("system:stats", { stats });
+      }
+    })
+    .catch(() => {});
 }
 
 export async function registerApiRoutes(app: FastifyInstance) {
@@ -114,6 +128,22 @@ export async function registerApiRoutes(app: FastifyInstance) {
       return reply.send({ ok: true });
     } catch {
       return reply.status(500).send({ error: "Docker action failed" });
+    }
+  });
+
+  app.get("/api/system/stats", async (request, reply) => {
+    if (await requireAuth(request, reply)) return;
+
+    const settings = await getSettings();
+    if (!settings.showSystemInfo) {
+      return reply.status(404).send({ error: "System info disabled" });
+    }
+
+    try {
+      const stats = await getSystemStats();
+      return reply.send({ stats });
+    } catch {
+      return reply.status(503).send({ error: "System stats unavailable" });
     }
   });
 

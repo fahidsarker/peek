@@ -7,6 +7,7 @@ import { Clock } from "@/components/clock";
 import { DockerContainerDialog } from "@/components/docker-container-dialog";
 import { DockerList, DockerListHeader } from "@/components/docker-list";
 import { FadeIn } from "@/components/fade-in";
+import { SystemInfoWidget } from "@/components/system-info-widget";
 import { WeatherWidget } from "@/components/weather-widget";
 import { useSession } from "@/lib/auth-context";
 import { useDockerContainers } from "@/lib/hooks/use-docker-containers";
@@ -16,6 +17,7 @@ export function DashboardPage() {
   const { user, settings } = useSession();
   const showDocker = user?.showDocker ?? false;
   const appsCompactView = settings?.appsCompactView ?? true;
+  const showSystemInfo = settings?.showSystemInfo ?? true;
   const isMobile = useMediaQuery("(max-width: 767px)");
   const [activeSection, setActiveSection] = useState<"apps" | "docker">("apps");
   const [selectedContainerId, setSelectedContainerId] = useState<string | null>(
@@ -69,6 +71,7 @@ export function DashboardPage() {
           collapsible={isMobile && showDocker}
           onToggle={() => setActiveSection("apps")}
         >
+          {showSystemInfo && <SystemInfoWidget />}
           <AppList compact={appsCompactView} />
         </CollapsibleSection>
 

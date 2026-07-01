@@ -261,6 +261,7 @@ export function AdminPanel({ currentUserId }: { currentUserId: string }) {
             const result = await apiPatch("/api/admin/settings", {
               allowSignups: form.get("allowSignups") === "on",
               appsCompactView: form.get("appsCompactView") === "on",
+              showSystemInfo: form.get("showSystemInfo") === "on",
               weatherProvider: form.get("weatherProvider"),
               weatherUseCurrentLocation:
                 form.get("weatherUseCurrentLocation") === "on",
@@ -295,6 +296,15 @@ export function AdminPanel({ currentUserId }: { currentUserId: string }) {
               defaultChecked={settings?.appsCompactView ?? true}
             />
             Compact app list
+          </label>
+
+          <label className="flex items-center gap-2 font-console text-sm">
+            <input
+              type="checkbox"
+              name="showSystemInfo"
+              defaultChecked={settings?.showSystemInfo ?? true}
+            />
+            Show system info
           </label>
 
           <label className="block space-y-1">
