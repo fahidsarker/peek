@@ -4,7 +4,7 @@
 
 <p align="center">
   Ultra-minimal dashboard for NAS or self-hosted servers.<br />
-  Welcome header with date, time, and weather; user-managed app shortcuts with health pings; Docker container list with restart and pause/start controls.
+  Welcome header with date, time, and weather; host system metrics (CPU, RAM, disk, network); user-managed app shortcuts with health pings; Docker container list with restart and pause/start controls.
 </p>
 
 ---
@@ -116,4 +116,6 @@ docker compose up -d --build
 
 ## Real-time updates
 
-Socket.IO pushes `apps:status` (60s), `docker:containers` (15s), and `settings:updated` events. The client uses custom cache hooks with localStorage hydration and stale/fresh UI indicators.
+Socket.IO pushes `apps:status` (60s), `docker:containers` (15s), `system:stats` (2s), and `settings:updated` events. The client uses custom cache hooks with localStorage hydration and stale/fresh UI indicators.
+
+**System metrics** reflect the host machine running the Peek server (macOS, Windows, or Linux). Admins can show or hide the system info panel from Settings.

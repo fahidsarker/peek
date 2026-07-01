@@ -13,7 +13,7 @@ import {
   clearSessionHint,
   writeSessionHint,
 } from "./session-hint";
-import { connectSocket, disconnectSocket } from "./socket";
+import { connectSocket, disconnectSocket, getSocket } from "./socket";
 
 type AuthContextValue = {
   session: SessionResponse | null;
@@ -63,6 +63,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       })
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    if (!session?.user) return;
+
+    const socket = getSocket();
+    if (!socket) return;
+
+    const handler = (payload: unknown) => {
+      const { settings } = payload as {
+        settings: {
+          appsCompactView: boolean;
+          allowSignups: boolean;
+          showSystemInfo: boolean;
+        };
+      };
+
+      setSession((prev) =>
+        prev?.user
+          ? {
+              ...prev,
+              settings: {
+                appsCompactView: settings.appsCompactView,
+                allowSignups: settings.allowSignups,
+                showSystemInfo: settings.showSystemInfo,
+              },
+            }
+          : prev,
+      );
+    };
+
+    socket.on("settings:updated", handler);
+    return () => {
+      socket.off("settings:updated", handler);
+    };
+  }, [session?.user]);
 
   const logout = useCallback(async () => {
     const userId = session?.user?.id;

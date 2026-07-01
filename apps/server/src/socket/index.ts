@@ -7,11 +7,13 @@ import { getSettings } from "../services/settings";
 import {
   broadcastAppsStatus,
   broadcastDockerContainers,
+  broadcastSystemStats,
   setSocketServer,
 } from "../routes/api";
 
 const DOCKER_INTERVAL_MS = 15_000;
 const APPS_INTERVAL_MS = 60_000;
+const SYSTEM_INTERVAL_MS = 2_000;
 
 export function createSocketServer(httpServer: HttpServer) {
   const clientOrigin = process.env.APP_URL ?? "http://localhost:5173";
@@ -46,7 +48,21 @@ export function createSocketServer(httpServer: HttpServer) {
 
     const settings = await getSettings();
     socket.emit("settings:updated", { settings });
+
+    if (settings.showSystemInfo) {
+      try {
+        const { getSystemStats } = await import("../services/system-stats");
+        const stats = await getSystemStats();
+        socket.emit("system:stats", { stats });
+      } catch {
+        // omit initial stats on failure
+      }
+    }
   });
+
+  setInterval(() => {
+    broadcastSystemStats();
+  }, SYSTEM_INTERVAL_MS);
 
   setInterval(() => {
     broadcastDockerContainers();

@@ -71,6 +71,7 @@ export const settings = pgTable("settings", {
     .default(false)
     .notNull(),
   appsCompactView: boolean("apps_compact_view").default(true).notNull(),
+  showSystemInfo: boolean("show_system_info").default(true).notNull(),
   createdBy: text("created_by").references(() => user.id, {
     onDelete: "set null",
   }),

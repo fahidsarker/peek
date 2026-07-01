@@ -38,6 +38,7 @@ export async function registerAuthRoutes(app: FastifyInstance) {
       settings: {
         appsCompactView: settings.appsCompactView,
         allowSignups: settings.allowSignups,
+        showSystemInfo: settings.showSystemInfo,
       },
     });
   });

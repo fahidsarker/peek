@@ -172,6 +172,7 @@ export async function deleteUser(currentUser: AuthUser, userId: string) {
 const settingsSchema = z.object({
   allowSignups: z.boolean(),
   appsCompactView: z.boolean(),
+  showSystemInfo: z.boolean(),
   weatherProvider: z.enum(["open-meteo", "openweather"]),
   weatherUseCurrentLocation: z.boolean(),
   weatherCity: z.string().optional(),
@@ -191,6 +192,7 @@ export async function updateSettings(user: AuthUser, body: unknown) {
     .set({
       allowSignups: parsed.data.allowSignups,
       appsCompactView: parsed.data.appsCompactView,
+      showSystemInfo: parsed.data.showSystemInfo,
       weatherProvider: parsed.data.weatherProvider,
       weatherUseCurrentLocation: parsed.data.weatherUseCurrentLocation,
       weatherCity: parsed.data.weatherCity ?? null,
